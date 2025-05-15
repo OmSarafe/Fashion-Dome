@@ -215,7 +215,7 @@ class _FilterSheetState extends State<FilterSheet> {
       maxChildSize: 0.7,
       builder: (context, scrollController) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           decoration: const BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -227,12 +227,15 @@ class _FilterSheetState extends State<FilterSheet> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Filters',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontFamily: 'GeneralSans',
-                        fontWeight: FontWeight.w600,
-                      )),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: const Text('Filters',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w600,
+                        )),
+                  ),
                   IconButton(
                     icon: const Icon(Icons.close),
                     onPressed: () => Navigator.pop(context),
@@ -240,14 +243,18 @@ class _FilterSheetState extends State<FilterSheet> {
                 ],
               ),
 
-              const Text('Sort By',
-                  style: TextStyle(
-                      fontFamily: 'GeneralSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Text('Sort By',
+                    style: TextStyle(
+                        fontFamily: 'GeneralSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600)),
+              ),
 
               const SizedBox(height: 5),
               SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: _sortOptions.map((option) {
@@ -362,4 +369,174 @@ class _FilterSheetState extends State<FilterSheet> {
       },
     );
   }
+}
+
+class PriceRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color labelColor;
+  final Color valueColor;
+  final FontWeight labelWeight;
+  final FontWeight valueWeight;
+
+  const PriceRow({
+    Key? key,
+    required this.label,
+    required this.value,
+    this.labelColor = Colors.grey,
+    this.valueColor = Colors.black,
+    this.labelWeight = FontWeight.w400,
+    this.valueWeight = FontWeight.w500,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'GeneralSans',
+              fontWeight: FontWeight.w400,
+              color: labelColor,
+              fontSize: 16,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'GeneralSans',
+              fontWeight: FontWeight.w600,
+              color: valueColor,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+void showLogoutDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true, // Prevents closing when tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          height: MediaQuery.of(context).size.height * 0.4,
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              SvgPicture.asset(
+                "assets/logout.svg",
+                height: 70,
+              ),
+              Text(
+                "Logout?",
+                style: const TextStyle(
+                  fontFamily: 'GeneralSans',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 32,
+                ),
+              ),
+              Text(
+                textAlign: TextAlign.center,
+                "Are you sure you want to logout?",
+                style: const TextStyle(
+                  fontFamily: 'GeneralSans',
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.red,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Yes,logout",
+                        style: TextStyle(
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15.0,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const LoginPage(),
+                    //   ),
+                    // );
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.black),
+                      color: Colors.white,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "No,cancel",
+                        style: TextStyle(
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0,
+                          color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    },
+  );
 }

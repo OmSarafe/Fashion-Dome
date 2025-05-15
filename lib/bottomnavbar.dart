@@ -1,4 +1,6 @@
 import 'package:ecommerence_project/account.dart';
+import 'package:ecommerence_project/cartpage.dart';
+import 'package:ecommerence_project/savedpage.dart';
 import 'package:ecommerence_project/search.dart';
 import 'package:flutter/material.dart';
 
@@ -40,8 +42,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   final List<Widget> _screens = [
     DiscoverScreen(),
     Search(),
-    Center(child: Text("Saved Page")),
-    Center(child: Text("Cart Page")),
+    Savedpage(),
+    Cartpage(),
     Account()
   ];
 

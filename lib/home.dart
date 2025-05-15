@@ -1,3 +1,4 @@
+import 'package:ecommerence_project/notification.dart';
 import 'package:ecommerence_project/widgets/basicwidget.dart';
 import 'package:flutter/material.dart';
 
@@ -64,8 +65,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.black),
             onPressed: () {
-              // Navigator.push(context,
-              //     MaterialPageRoute(builder: (context) => ()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()));
             },
           ),
           SizedBox(
