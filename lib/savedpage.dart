@@ -101,7 +101,7 @@ class _SavedpageState extends State<Savedpage> {
                         children: [
                           // Product Image
                           Container(
-                            height: 150,
+                            height: 130,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
                               image: DecorationImage(

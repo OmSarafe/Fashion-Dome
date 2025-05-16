@@ -1,4 +1,4 @@
-import 'package:ecommerence_project/bottomnavbar.dart';
+import 'package:ecommerence_project/BottomNavBar/bottom_nav_bar_page.dart';
 import 'package:ecommerence_project/forgotpassword.dart';
 import 'package:ecommerence_project/signup_page.dart';
 import 'package:ecommerence_project/widgets/titlesubtitlewidget.dart';

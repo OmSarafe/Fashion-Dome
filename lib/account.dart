@@ -1,5 +1,8 @@
 import 'package:ecommerence_project/faqpage.dart';
 import 'package:ecommerence_project/helpcenter.dart';
+import 'package:ecommerence_project/login_page.dart';
+import 'package:ecommerence_project/myorder.dart';
+import 'package:ecommerence_project/notification_setting.dart';
 import 'package:ecommerence_project/widgets/basicwidget.dart';
 import 'package:flutter/material.dart';
 
@@ -54,7 +57,14 @@ class _AccountState extends State<Account> {
             indent: 20,
             endIndent: 20,
           ),
-          buildMenuItem(Icons.local_shipping_outlined, "My Orders"),
+          buildMenuItem(Icons.local_shipping_outlined, "My Orders", onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Myorder()), // Replace SecondPage with your target widget
+            );
+          }),
           // Section 2
           Divider(
             color: Color(0xffE6E6E6),
@@ -66,10 +76,15 @@ class _AccountState extends State<Account> {
           divider(),
           buildMenuItem(Icons.credit_card_outlined, "Payment Methods"),
           divider(),
-          buildMenuItem(
-            Icons.notifications_outlined,
-            "Notifications",
-          ),
+          buildMenuItem(Icons.notifications_outlined, "Notifications",
+              onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      NotificationSettingsPage()), // Replace SecondPage with your target widget
+            );
+          }),
           Divider(
             color: Color(0xffE6E6E6),
             thickness: 8,
@@ -109,6 +124,12 @@ class _AccountState extends State<Account> {
               ),
             ),
             onTap: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+                (Route<dynamic> route) => false,
+              );
+
               // Handle logout
             },
           ),
