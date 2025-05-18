@@ -1,10 +1,10 @@
-import 'package:ecommerence_project/account.dart';
-import 'package:ecommerence_project/cartpage.dart';
-import 'package:ecommerence_project/savedpage.dart';
-import 'package:ecommerence_project/search.dart';
+import 'package:ecommerence_project/Account/account.dart';
+import 'package:ecommerence_project/cart/cartpage.dart';
+import 'package:ecommerence_project/Saved/savedpage.dart';
+import 'package:ecommerence_project/Search/search.dart';
 import 'package:flutter/material.dart';
 
-import '../home.dart';
+import '../Home/home.dart';
 
 class BottomNavBar extends StatefulWidget {
   final int selectedIndex;
