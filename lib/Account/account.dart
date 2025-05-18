@@ -3,7 +3,9 @@ import 'package:ecommerence_project/Account/helpcenter.dart';
 import 'package:ecommerence_project/Login/login_page.dart';
 import 'package:ecommerence_project/Account/myorder.dart';
 import 'package:ecommerence_project/Account/notification_setting.dart';
+import 'package:ecommerence_project/addresspage.dart';
 import 'package:ecommerence_project/mydetails.dart';
+import 'package:ecommerence_project/payment_page.dart';
 import 'package:ecommerence_project/widgets/basicwidget.dart';
 import 'package:flutter/material.dart';
 
@@ -71,7 +73,7 @@ class _AccountState extends State<Account> {
             color: Color(0xffE6E6E6),
             thickness: 8,
           ),
-          buildMenuItem(Icons.person_outline, "My Details",onTap: (){
+          buildMenuItem(Icons.person_outline, "My Details", onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -80,9 +82,24 @@ class _AccountState extends State<Account> {
             );
           }),
           divider(),
-          buildMenuItem(Icons.home_outlined, "Address Book"),
+          buildMenuItem(Icons.home_outlined, "Address Book", onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      Addresspage()), // Replace SecondPage with your target widget
+            );
+          }),
           divider(),
-          buildMenuItem(Icons.credit_card_outlined, "Payment Methods"),
+          buildMenuItem(Icons.credit_card_outlined, "Payment Methods",
+              onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      PaymentPage()), // Replace SecondPage with your target widget
+            );
+          }),
           divider(),
           buildMenuItem(Icons.notifications_outlined, "Notifications",
               onTap: () {
@@ -128,10 +145,12 @@ class _AccountState extends State<Account> {
               },
               child: Text(
                 "Logout",
-                style: TextStyle(color: Colors.red,
+                style: TextStyle(
+                  color: Colors.red,
                   fontFamily: 'GeneralSans',
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,),
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
             onTap: () {

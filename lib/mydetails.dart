@@ -141,13 +141,11 @@ class _MydetailsState extends State<Mydetails> {
                         fontSize: 14,
                         color: Colors.grey),
                     enabledBorder: OutlineInputBorder(
-                      borderSide:
-                      const BorderSide(width: 0.5, color: Colors.grey),
+                      borderSide: const BorderSide(color: Colors.grey),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide:
-                      const BorderSide(color: Colors.black, width: 1.5),
+                      borderSide: const BorderSide(color: Colors.black, width: 2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     errorBorder: OutlineInputBorder(
@@ -155,8 +153,7 @@ class _MydetailsState extends State<Mydetails> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
-                      borderSide:
-                      const BorderSide(color: Colors.red, width: 2),
+                      borderSide: const BorderSide(color: Colors.red, width: 2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),

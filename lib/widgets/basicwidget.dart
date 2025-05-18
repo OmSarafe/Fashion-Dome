@@ -1,4 +1,9 @@
+import 'package:ecommerence_project/BottomNavBar/bottom_nav_bar_page.dart';
+import 'package:ecommerence_project/Cart/cartpage.dart';
+import 'package:ecommerence_project/Home/home.dart';
 import 'package:ecommerence_project/Login/login_page.dart';
+import 'package:ecommerence_project/addresspage.dart';
+import 'package:ecommerence_project/checkout_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -285,82 +290,95 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
 
               const SizedBox(height: 15),
-              const Text('Price',
-                  style: TextStyle(
-                      fontFamily: 'GeneralSans',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Text('Price',
+                    style: TextStyle(
+                        fontFamily: 'GeneralSans',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600)),
+              ),
               const SizedBox(height: 8),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('\$ ${_minPrice.toInt()}'),
-                  Text('\$ ${_maxPrice.toInt()}'),
-                ],
-              ),
-              RangeSlider(
-                values: RangeValues(_minPrice, _maxPrice),
-                min: 0,
-                max: 100,
-                divisions: 100,
-                onChanged: (values) {
-                  setState(() {
-                    _minPrice = values.start;
-                    _maxPrice = values.end;
-                  });
-                },
-                activeColor: Colors.black,
-                inactiveColor: Colors.grey.shade300,
-              ),
-
-              const Text('Size',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 8),
-              Container(
-                height: 40,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade300),
-                  borderRadius: BorderRadius.circular(8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('\$ ${_minPrice.toInt()}'),
+                    Text('\$ ${_maxPrice.toInt()}'),
+                  ],
                 ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: _selectedSize,
-                    isExpanded: true,
-                    items: _sizes.map((size) {
-                      return DropdownMenuItem(
-                        value: size,
-                        child: Text(size),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => _selectedSize = value);
-                      }
-                    },
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),                child: RangeSlider(
+                  values: RangeValues(_minPrice, _maxPrice),
+                  min: 0,
+                  max: 100,
+                  divisions: 100,
+                  onChanged: (values) {
+                    setState(() {
+                      _minPrice = values.start;
+                      _maxPrice = values.end;
+                    });
+                  },
+                  activeColor: Colors.black,
+                  inactiveColor: Colors.grey.shade300,
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),                child: const Text('Size',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),                child: Container(
+                  height: 40,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: _selectedSize,
+                      isExpanded: true,
+                      items: _sizes.map((size) {
+                        return DropdownMenuItem(
+                          value: size,
+                          child: Text(size),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() => _selectedSize = value);
+                        }
+                      },
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 15),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    onPressed: () {
+                      // You can collect and use selected filters here
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Apply Filters',
+                        style: TextStyle(color: Colors.white)),
                   ),
-                  onPressed: () {
-                    // You can collect and use selected filters here
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Apply Filters',
-                      style: TextStyle(color: Colors.white)),
                 ),
               )
             ],
@@ -503,6 +521,7 @@ void showLogoutDialog(BuildContext context) {
                 ),
                 child: GestureDetector(
                   onTap: () {
+                    // Navigator.pop(context);
                     // Navigator.push(
                     //   context,
                     //   MaterialPageRoute(
@@ -526,6 +545,252 @@ void showLogoutDialog(BuildContext context) {
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0,
                           color: Colors.black,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+void showAddressDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true, // Prevents closing when tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          height: MediaQuery.of(context).size.height * 0.32,
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              SvgPicture.asset(
+                "assets/tick.svg",
+                height: 70,
+              ),
+              Text(
+                "Congratulations!",
+                style: const TextStyle(
+                    fontFamily: 'GeneralSans',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 32,
+                    letterSpacing: -2),
+              ),
+              Text(
+                textAlign: TextAlign.center,
+                "Your new address has been added.",
+                style: const TextStyle(
+                  fontFamily: 'GeneralSans',
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CheckoutPage(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.black,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Thanks",
+                        style: TextStyle(
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showcardDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true, // Prevents closing when tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          height: MediaQuery.of(context).size.height * 0.32,
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              SvgPicture.asset(
+                "assets/tick.svg",
+                height: 70,
+              ),
+              Text(
+                "Congratulations!",
+                style: const TextStyle(
+                    fontFamily: 'GeneralSans',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 32,
+                    letterSpacing: -2),
+              ),
+              Text(
+                textAlign: TextAlign.center,
+                "Your new card has been added.",
+                style: const TextStyle(
+                  fontFamily: 'GeneralSans',
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CheckoutPage(),
+                      ),
+                    );
+                  },
+                  child: Container(
+
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.black,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Thanks",
+                        style: TextStyle(
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0,
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+void showorderDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true, // Prevents closing when tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        content: Container(
+          height: MediaQuery.of(context).size.height * 0.32,
+          width: MediaQuery.of(context).size.width * 0.85,
+          decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(10)),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 10,
+              ),
+              SvgPicture.asset(
+                "assets/tick.svg",
+                height: 70,
+              ),
+              Text(
+                "Congratulations!",
+                style: const TextStyle(
+                    fontFamily: 'GeneralSans',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 32,
+                    letterSpacing: -2),
+              ),
+              Text(
+                textAlign: TextAlign.center,
+                "Your order has been placed.",
+                style: const TextStyle(
+                  fontFamily: 'GeneralSans',
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  BottomNavBar(),
+                      ),
+                    );
+                  },
+                  child: Container(
+
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.black,
+                    ),
+                    child: const Center(
+                      child: Text(
+                        "Thanks",
+                        style: TextStyle(
+                          fontFamily: 'GeneralSans',
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0,
+                          color: Colors.white,
                           fontSize: 16,
                         ),
                       ),

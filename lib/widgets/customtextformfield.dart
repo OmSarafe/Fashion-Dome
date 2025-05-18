@@ -41,11 +41,13 @@ class CustomInputField extends StatelessWidget {
               fontSize: 14,
             ),
             enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.grey),
+              borderSide:
+              const BorderSide(width: 0.5, color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
             ),
             focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.black, width: 2),
+              borderSide:
+              const BorderSide(color: Colors.black, width: 1.5),
               borderRadius: BorderRadius.circular(8),
             ),
             errorBorder: OutlineInputBorder(
@@ -53,7 +55,8 @@ class CustomInputField extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.red, width: 2),
+              borderSide:
+              const BorderSide(color: Colors.red, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
           ),
@@ -121,7 +124,6 @@ class _DatePickerTextFieldState extends State<DatePickerTextField> {
             borderSide: const BorderSide(color: Colors.red, width: 2),
             borderRadius: BorderRadius.circular(8),
           ),
-          border: OutlineInputBorder(),
         ),
       ),
     );

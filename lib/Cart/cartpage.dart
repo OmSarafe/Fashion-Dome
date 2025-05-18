@@ -1,3 +1,4 @@
+import 'package:ecommerence_project/checkout_page.dart';
 import 'package:ecommerence_project/widgets/basicwidget.dart';
 import 'package:flutter/material.dart';
 
@@ -245,12 +246,12 @@ class _CartpageState extends State<Cartpage> {
           color: Colors.white,
           child: GestureDetector(
             onTap: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //       builder: (context) =>
-              //           BottomNavBar()), // Replace SecondPage with your target widget
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        CheckoutPage()), // Replace SecondPage with your target widget
+              );
             },
             child: Container(
               height: 50,
