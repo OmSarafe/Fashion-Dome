@@ -1,0 +1,52 @@
+# Dart and Flutter generated files
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# Local Codex/runtime files
+.codex-analysis-data/
+.tool-appdata/
+.tool-localappdata/
+
+# Android generated and local configuration
+android/.gradle/
+android/captures/
+android/local.properties
+android/key.properties
+**/*.jks
+**/*.keystore
+
+# Firebase application configuration is installed per developer
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
+# iOS/macOS generated files
+ios/Flutter/.last_build_id
+ios/Pods/
+macos/Pods/
+**/DerivedData/
+
+# Firebase and Cloud Functions generated/local files
+firebase-debug.log
+firebase-debug.*.log
+functions/node_modules/
+functions/.runtimeconfig.json
+
+# Local secrets
+.env
+.env.*
+!.env.example

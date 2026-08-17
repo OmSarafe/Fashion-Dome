@@ -1,9 +1,10 @@
-import 'package:ecommerence_project/BottomNavBar/bottom_nav_bar_page.dart';
-import 'package:ecommerence_project/Cart/cartpage.dart';
-import 'package:ecommerence_project/Home/home.dart';
-import 'package:ecommerence_project/Login/login_page.dart';
-import 'package:ecommerence_project/addresspage.dart';
-import 'package:ecommerence_project/checkout_page.dart';
+import 'package:ecommerence_project/screens/navigation/bottom_nav_bar_page.dart';
+import 'package:ecommerence_project/screens/cart/cart_page.dart';
+import 'package:ecommerence_project/screens/catalog/home_page.dart';
+import 'package:ecommerence_project/screens/auth/login_page.dart';
+import 'package:ecommerence_project/screens/account/address_page.dart';
+import 'package:ecommerence_project/screens/checkout/checkout_page.dart';
+import 'package:ecommerence_project/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -301,7 +302,8 @@ class _FilterSheetState extends State<FilterSheet> {
               const SizedBox(height: 8),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),                child: Row(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text('\$ ${_minPrice.toInt()}'),
@@ -310,7 +312,8 @@ class _FilterSheetState extends State<FilterSheet> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),                child: RangeSlider(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: RangeSlider(
                   values: RangeValues(_minPrice, _maxPrice),
                   min: 0,
                   max: 100,
@@ -327,12 +330,15 @@ class _FilterSheetState extends State<FilterSheet> {
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),                child: const Text('Size',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: const Text('Size',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
               ),
               const SizedBox(height: 8),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),                child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
                   height: 40,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -362,7 +368,8 @@ class _FilterSheetState extends State<FilterSheet> {
 
               const SizedBox(height: 15),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),                child: SizedBox(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
@@ -439,127 +446,85 @@ class PriceRow extends StatelessWidget {
 }
 
 void showLogoutDialog(BuildContext context) {
-  showDialog(
+  showDialog<void>(
     context: context,
-    barrierDismissible: true, // Prevents closing when tapping outside
-    builder: (BuildContext context) {
+    barrierDismissible: true,
+    builder: (dialogContext) {
+      final colors = Theme.of(dialogContext).colorScheme;
       return AlertDialog(
-        backgroundColor: Colors.white,
-        contentPadding: EdgeInsets.zero,
-        content: Container(
-          height: MediaQuery.of(context).size.height * 0.4,
-          width: MediaQuery.of(context).size.width * 0.85,
-          decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(10)),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 10,
-              ),
-              SvgPicture.asset(
-                "assets/logout.svg",
-                height: 70,
-              ),
-              Text(
-                "Logout?",
-                style: const TextStyle(
-                  fontFamily: 'GeneralSans',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 32,
+        backgroundColor: colors.surface,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        contentPadding: const EdgeInsets.fromLTRB(24, 22, 24, 20),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SvgPicture.asset(
+                  "assets/logout.svg",
+                  height: 64,
                 ),
-              ),
-              Text(
-                textAlign: TextAlign.center,
-                "Are you sure you want to logout?",
-                style: const TextStyle(
-                  fontFamily: 'GeneralSans',
-                  fontSize: 16,
-                  color: Colors.grey,
+                const SizedBox(height: 12),
+                const Text(
+                  "Logout?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'GeneralSans',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 28,
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const LoginPage(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Colors.red,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Yes,logout",
-                        style: TextStyle(
-                          fontFamily: 'GeneralSans',
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0,
-                          color: Colors.white,
-                          fontSize: 16,
+                const SizedBox(height: 6),
+                Text(
+                  textAlign: TextAlign.center,
+                  "Are you sure you want to logout?",
+                  style: TextStyle(
+                    fontFamily: 'GeneralSans',
+                    fontSize: 16,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 50,
+                  child: FilledButton(
+                    style:
+                        FilledButton.styleFrom(backgroundColor: colors.error),
+                    onPressed: () async {
+                      await AuthService().signOut();
+                      if (!dialogContext.mounted) return;
+                      Navigator.pushAndRemoveUntil(
+                        dialogContext,
+                        MaterialPageRoute(
+                          builder: (_) => const LoginPage(),
                         ),
-                      ),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      'Yes, log out',
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 15.0,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigator.pop(context);
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) => const LoginPage(),
-                    //   ),
-                    // );
-                  },
-                  child: Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.black),
-                      color: Colors.white,
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "No,cancel",
-                        style: TextStyle(
-                          fontFamily: 'GeneralSans',
-                          fontWeight: FontWeight.w500,
-                          letterSpacing: 0,
-                          color: Colors.black,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text('No, cancel'),
                   ),
                 ),
-              )
-            ],
+              ],
+            ),
           ),
         ),
       );
     },
   );
 }
-
 
 void showAddressDialog(BuildContext context) {
   showDialog(
@@ -600,7 +565,6 @@ void showAddressDialog(BuildContext context) {
                   color: Colors.grey,
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: GestureDetector(
@@ -681,7 +645,6 @@ void showcardDialog(BuildContext context) {
                   color: Colors.grey,
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: GestureDetector(
@@ -694,7 +657,6 @@ void showcardDialog(BuildContext context) {
                     );
                   },
                   child: Container(
-
                     height: 50,
                     width: 250,
                     decoration: BoxDecoration(
@@ -763,7 +725,6 @@ void showorderDialog(BuildContext context) {
                   color: Colors.grey,
                 ),
               ),
-
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: GestureDetector(
@@ -771,12 +732,11 @@ void showorderDialog(BuildContext context) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  BottomNavBar(),
+                        builder: (context) => BottomNavBar(),
                       ),
                     );
                   },
                   child: Container(
-
                     height: 50,
                     width: 250,
                     decoration: BoxDecoration(
