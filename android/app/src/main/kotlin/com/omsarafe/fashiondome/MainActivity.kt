@@ -1,4 +1,4 @@
-package com.example.ecommerence_project
+package com.omsarafe.fashiondome
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine

@@ -195,9 +195,12 @@ class _MapAddressPickerPageState extends State<MapAddressPickerPage> {
       final placemarks = await placemarkFromCoordinates(
         _selectedLocation.latitude,
         _selectedLocation.longitude,
-      );
-      final address =
+      ).timeout(const Duration(seconds: 8));
+      final formattedAddress =
           placemarks.isEmpty ? '' : _formatAddress(placemarks.first);
+      final address = formattedAddress.isEmpty
+          ? _coordinateFallbackAddress()
+          : formattedAddress;
       if (!mounted) return;
       Navigator.of(context).pop(
         MapAddressSelection(location: _selectedLocation, address: address),
@@ -205,7 +208,10 @@ class _MapAddressPickerPageState extends State<MapAddressPickerPage> {
     } catch (_) {
       if (!mounted) return;
       Navigator.of(context).pop(
-        MapAddressSelection(location: _selectedLocation, address: ''),
+        MapAddressSelection(
+          location: _selectedLocation,
+          address: _coordinateFallbackAddress(),
+        ),
       );
     } finally {
       if (mounted) setState(() => _isFindingAddress = false);
@@ -229,6 +235,12 @@ class _MapAddressPickerPageState extends State<MapAddressPickerPage> {
       }
     }
     return uniqueParts.join(', ');
+  }
+
+  String _coordinateFallbackAddress() {
+    return 'Selected location: '
+        '${_selectedLocation.latitude.toStringAsFixed(5)}, '
+        '${_selectedLocation.longitude.toStringAsFixed(5)}';
   }
 
   @override
