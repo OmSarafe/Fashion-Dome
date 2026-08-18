@@ -183,6 +183,9 @@ also be verified against the configured test project.
 
 The functional MSc prototype is complete and tested in Firebase/Stripe test
 mode. Android uses the production application ID `com.omsarafe.fashiondome`.
-Before public distribution, configure release signing and its Firebase/Maps SHA
-fingerprints, publish the privacy-policy details, and build a final signed
-Android App Bundle.
+Release signing is configured with a separately backed-up upload key, its
+Firebase/Maps fingerprints are registered, and a signed Android App Bundle has
+been verified. Before public distribution, publish the privacy policy, complete
+the store listing and data-safety declaration, run closed-device testing, and
+either retain clearly labelled test payments or complete the production payment
+onboarding and compliance checks.
