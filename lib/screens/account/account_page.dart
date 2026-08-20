@@ -3,6 +3,7 @@ import 'package:ecommerence_project/screens/account/appearance_page.dart';
 import 'package:ecommerence_project/screens/account/help_center_page.dart';
 import 'package:ecommerence_project/screens/account/my_orders_page.dart';
 import 'package:ecommerence_project/screens/account/notification_settings_page.dart';
+import 'package:ecommerence_project/screens/account/privacy_policy_page.dart';
 import 'package:ecommerence_project/screens/auth/login_page.dart';
 import 'package:ecommerence_project/screens/notifications/notifications_page.dart';
 import 'package:ecommerence_project/screens/account/address_page.dart';
@@ -28,6 +29,7 @@ class _AccountState extends State<Account> {
     final authService = AuthService();
     final usesPassword = authService.currentUserUsesPassword;
     final passwordController = TextEditingController();
+    final rootNavigator = Navigator.of(context, rootNavigator: true);
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -98,19 +100,16 @@ class _AccountState extends State<Account> {
       await authService.deleteCurrentAccount(
         password: usesPassword ? passwordController.text : null,
       );
-      if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).pop();
-      Navigator.pushAndRemoveUntil(
-        context,
+      if (!rootNavigator.mounted) return;
+      rootNavigator.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginPage()),
         (route) => false,
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your account has been deleted.')),
-      );
     } on FirebaseAuthException catch (error) {
+      if (rootNavigator.mounted && rootNavigator.canPop()) {
+        rootNavigator.pop();
+      }
       if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).pop();
       final message = switch (error.code) {
         'wrong-password' ||
         'invalid-credential' =>
@@ -121,9 +120,16 @@ class _AccountState extends State<Account> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Account deletion failed: $error');
+      debugPrintStack(
+        label: 'Account deletion stack trace',
+        stackTrace: stackTrace,
+      );
+      if (rootNavigator.mounted && rootNavigator.canPop()) {
+        rootNavigator.pop();
+      }
       if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to delete the account.')),
       );
@@ -285,6 +291,16 @@ class _AccountState extends State<Account> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const AppearancePage(),
+                ),
+              );
+            }),
+            divider(),
+            buildMenuItem(Icons.privacy_tip_outlined, "Privacy Policy",
+                onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const PrivacyPolicyPage(),
                 ),
               );
             }),

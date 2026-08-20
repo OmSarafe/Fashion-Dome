@@ -181,6 +181,10 @@ class AuthService {
       userReference.collection('favorites').get(),
       userReference.collection('cart').get(),
       _firestore.collection('orders').where('userId', isEqualTo: userId).get(),
+      _firestore
+          .collectionGroup('reviews')
+          .where('userId', isEqualTo: userId)
+          .get(),
     ]);
 
     final references = <DocumentReference<Object?>>[

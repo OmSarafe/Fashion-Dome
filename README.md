@@ -169,6 +169,9 @@ also be verified against the configured test project.
 
 ## Security and privacy
 
+- The project privacy notice is available in
+  [PRIVACY_POLICY.md](PRIVACY_POLICY.md), with a GitHub Pages-ready copy in
+  `docs/privacy-policy.html` and an equivalent page inside the app.
 - Customer and administrator permissions are enforced by Firebase rules and
   trusted Cloud Functions, not only by the interface.
 - Stripe handles card details; the application stores payment references rather

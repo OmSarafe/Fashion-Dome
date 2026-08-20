@@ -101,22 +101,21 @@ class ResponsiveBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final horizontal = ResponsiveLayout.horizontalPadding(
-          constraints.maxWidth,
-        );
-        return Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxWidth),
-            child: Padding(
-              padding: padding ??
-                  EdgeInsets.fromLTRB(horizontal, 12, horizontal, 16),
-              child: child,
-            ),
-          ),
-        );
-      },
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final horizontal = ResponsiveLayout.horizontalPadding(screenWidth);
+
+    // A bottomNavigationBar is measured with a loose vertical constraint.
+    // Shrink-wrap its height so it cannot expand over the Scaffold body.
+    return Center(
+      heightFactor: 1,
+      child: SizedBox(
+        width: math.min(screenWidth, maxWidth),
+        child: Padding(
+          padding: padding ??
+              EdgeInsets.fromLTRB(horizontal, 12, horizontal, 16),
+          child: child,
+        ),
+      ),
     );
   }
 }
