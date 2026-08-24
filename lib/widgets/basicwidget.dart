@@ -1,8 +1,5 @@
 import 'package:ecommerence_project/screens/navigation/bottom_nav_bar_page.dart';
-import 'package:ecommerence_project/screens/cart/cart_page.dart';
-import 'package:ecommerence_project/screens/catalog/home_page.dart';
 import 'package:ecommerence_project/screens/auth/login_page.dart';
-import 'package:ecommerence_project/screens/account/address_page.dart';
 import 'package:ecommerence_project/screens/checkout/checkout_page.dart';
 import 'package:ecommerence_project/services/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +18,6 @@ class _PinCodeInputState extends State<PinCodeInput> {
   final List<FocusNode> _focusNodes = List.generate(4, (_) => FocusNode());
   final List<TextEditingController> _controllers =
       List.generate(4, (_) => TextEditingController());
-
-  void _submitPin() {
-    if (_formKey.currentState!.validate()) {
-      String pin = _controllers.map((e) => e.text).join();
-      print("PIN Entered: $pin");
-      // You can proceed with pin
-    }
-  }
 
   @override
   void dispose() {
@@ -202,7 +191,6 @@ class FilterSheet extends StatefulWidget {
 class _FilterSheetState extends State<FilterSheet> {
   double _minPrice = 0;
   double _maxPrice = 19;
-  double _selectedPrice = 10;
   String _selectedSize = 'L';
   String _sortBy = 'Relevance';
 

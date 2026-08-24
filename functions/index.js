@@ -5,8 +5,16 @@ const {
 const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {defineSecret} = require("firebase-functions/params");
 const {initializeApp} = require("firebase-admin/app");
+const {getAuth} = require("firebase-admin/auth");
 const {getFirestore, FieldValue} = require("firebase-admin/firestore");
 const {getMessaging} = require("firebase-admin/messaging");
+const {getStorage} = require("firebase-admin/storage");
+const {
+  normalizeRequestedItems,
+  productSnapshot,
+  stripeOrderId,
+  validateDeliveryAddress,
+} = require("./order_logic");
 
 initializeApp();
 
@@ -20,6 +28,105 @@ const statusLabels = {
   delivered: "delivered",
   cancelled: "cancelled",
 };
+
+async function requireCustomer(database, userId) {
+  const snapshot = await database.collection("users").doc(userId).get();
+  if (!snapshot.exists || snapshot.get("role") !== "customer") {
+    throw new HttpsError(
+        "permission-denied",
+        "Only customer accounts can place orders.",
+    );
+  }
+  return snapshot;
+}
+
+async function requireAdmin(database, userId) {
+  const snapshot = await database.collection("users").doc(userId).get();
+  if (!snapshot.exists || snapshot.get("role") !== "admin") {
+    throw new HttpsError(
+        "permission-denied",
+        "Administrator access required.",
+    );
+  }
+  return snapshot;
+}
+
+async function loadTrustedCart(database, requestedItems) {
+  let normalizedItems;
+  try {
+    normalizedItems = normalizeRequestedItems(requestedItems);
+  } catch (error) {
+    throw new HttpsError("invalid-argument", error.message);
+  }
+
+  const productIds = [...new Set(normalizedItems.map((item) => item.productId))];
+  const productSnapshots = await Promise.all(productIds.map((productId) =>
+    database.collection("products").doc(productId).get(),
+  ));
+  const products = new Map();
+  for (const snapshot of productSnapshots) {
+    if (!snapshot.exists) {
+      throw new HttpsError("not-found", "A product is no longer available.");
+    }
+    products.set(snapshot.id, snapshot.data());
+  }
+
+  const requestedQuantities = new Map();
+  for (const item of normalizedItems) {
+    requestedQuantities.set(
+        item.productId,
+        (requestedQuantities.get(item.productId) || 0) + item.quantity,
+    );
+  }
+
+  for (const [productId, quantity] of requestedQuantities.entries()) {
+    const product = products.get(productId);
+    const priceInPence = Number(product.priceInPence);
+    const stock = Number(product.stock);
+    if (!Number.isInteger(priceInPence) || priceInPence < 1 ||
+        !Number.isInteger(stock) || stock < quantity) {
+      throw new HttpsError(
+          "failed-precondition",
+          "A product price or stock level has changed.",
+      );
+    }
+  }
+
+  let subtotalInPence = 0;
+  const trustedItems = normalizedItems.map((item) => {
+    const product = products.get(item.productId);
+    const sizes = Array.isArray(product.availableSizes) ?
+      product.availableSizes : [];
+    if (!sizes.includes(item.size)) {
+      throw new HttpsError(
+          "failed-precondition",
+          "A selected product size is no longer available.",
+      );
+    }
+    subtotalInPence += Number(product.priceInPence) * item.quantity;
+    return {
+      productId: item.productId,
+      product: productSnapshot(product),
+      size: item.size,
+      quantity: item.quantity,
+    };
+  });
+
+  const shippingInPence = 80;
+  return {
+    items: trustedItems,
+    subtotalInPence,
+    shippingInPence,
+    totalInPence: subtotalInPence + shippingInPence,
+  };
+}
+
+async function refundFailedStripeOrder(stripe, paymentIntentId) {
+  await stripe.refunds.create(
+      {payment_intent: paymentIntentId},
+      {idempotencyKey: `failed-order-${paymentIntentId}`},
+  );
+}
 
 async function sendMarketingNotification({title, body, data}) {
   const database = getFirestore();
@@ -154,67 +261,16 @@ exports.createStripePaymentIntent = onCall(
         throw new HttpsError("unauthenticated", "Sign in before paying.");
       }
 
-      const requestedItems = request.data && request.data.items;
-      if (!Array.isArray(requestedItems) || requestedItems.length === 0 ||
-          requestedItems.length > 50) {
-        throw new HttpsError("invalid-argument", "The cart is invalid.");
-      }
-
       const database = getFirestore();
-      const customerSnapshot = await database.collection("users")
-          .doc(request.auth.uid)
-          .get();
-      if (!customerSnapshot.exists ||
-          customerSnapshot.get("role") !== "customer") {
-        throw new HttpsError(
-            "permission-denied",
-            "Only customer accounts can make payments.",
-        );
-      }
-      let subtotalInPence = 0;
-      const requestedQuantities = new Map();
-      for (const item of requestedItems) {
-        const productId = item && item.productId;
-        const size = item && item.size;
-        const quantity = Number(item && item.quantity);
-        if (typeof productId !== "string" || productId.length === 0 ||
-            typeof size !== "string" || size.length === 0 ||
-            !Number.isInteger(quantity) || quantity < 1) {
-          throw new HttpsError("invalid-argument", "A cart item is invalid.");
-        }
-
-        const productSnapshot = await database
-            .collection("products")
-            .doc(productId)
-            .get();
-        if (!productSnapshot.exists) {
-          throw new HttpsError("not-found", "A product is no longer available.");
-        }
-        const product = productSnapshot.data();
-        const priceInPence = Number(product.priceInPence);
-        const stock = Number(product.stock);
-        const sizes = Array.isArray(product.availableSizes) ?
-          product.availableSizes : [];
-        const requestedQuantity =
-          (requestedQuantities.get(productId) || 0) + quantity;
-        if (!Number.isInteger(priceInPence) || priceInPence < 1 ||
-            !Number.isInteger(stock) || stock < requestedQuantity ||
-            !sizes.includes(size)) {
-          throw new HttpsError(
-              "failed-precondition",
-              "A product price, size, or stock level has changed.",
-          );
-        }
-        requestedQuantities.set(productId, requestedQuantity);
-        subtotalInPence += priceInPence * quantity;
-      }
-
-      const shippingInPence = 80;
-      const totalInPence = subtotalInPence + shippingInPence;
+      await requireCustomer(database, request.auth.uid);
+      const cart = await loadTrustedCart(
+          database,
+          request.data && request.data.items,
+      );
       const stripe = require("stripe")(stripeSecretKey.value());
       const email = request.auth.token.email;
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: totalInPence,
+        amount: cart.totalInPence,
         currency: "gbp",
         automatic_payment_methods: {enabled: true},
         ...(typeof email === "string" ? {receipt_email: email} : {}),
@@ -228,8 +284,270 @@ exports.createStripePaymentIntent = onCall(
         clientSecret: paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id,
         publishableKey: stripePublishableKey.value(),
-        totalInPence,
+        totalInPence: cart.totalInPence,
       };
+    },
+);
+
+exports.submitOrder = onCall(
+    {
+      region: "europe-west2",
+      secrets: [stripeSecretKey],
+    },
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Sign in before ordering.");
+      }
+
+      const database = getFirestore();
+      await requireCustomer(database, request.auth.uid);
+
+      const paymentMethod = request.data && request.data.paymentMethod;
+      if (paymentMethod !== "Cash on delivery" &&
+          paymentMethod !== "Stripe card payment") {
+        throw new HttpsError("invalid-argument", "Choose a payment method.");
+      }
+
+      let deliveryAddress;
+      try {
+        deliveryAddress = validateDeliveryAddress(
+            request.data && request.data.deliveryAddress,
+        );
+      } catch (error) {
+        throw new HttpsError("invalid-argument", error.message);
+      }
+
+      const paymentIntentId = request.data && request.data.paymentIntentId;
+      let stripe;
+      let paymentVerified = false;
+      let orderReference;
+
+      if (paymentMethod === "Stripe card payment") {
+        let orderId;
+        try {
+          orderId = stripeOrderId(paymentIntentId);
+        } catch (error) {
+          throw new HttpsError("invalid-argument", error.message);
+        }
+        orderReference = database.collection("orders").doc(orderId);
+
+        const existingOrder = await orderReference.get();
+        if (existingOrder.exists) {
+          if (existingOrder.get("userId") !== request.auth.uid ||
+              existingOrder.get("stripePaymentIntentId") !== paymentIntentId ||
+              existingOrder.get("orderSource") !== "trusted_function" ||
+              existingOrder.get("paymentStatus") !== "paid") {
+            throw new HttpsError(
+                "already-exists",
+                "This payment is already linked to another order.",
+            );
+          }
+          return {orderId: orderReference.id, existing: true};
+        }
+
+        stripe = require("stripe")(stripeSecretKey.value());
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+            paymentIntentId,
+        );
+        if (paymentIntent.metadata.firebaseUserId !== request.auth.uid) {
+          throw new HttpsError(
+              "permission-denied",
+              "This payment belongs to another customer.",
+          );
+        }
+        if (paymentIntent.status !== "succeeded") {
+          throw new HttpsError(
+              "failed-precondition",
+              "Stripe has not completed this payment.",
+          );
+        }
+        paymentVerified = true;
+      } else {
+        orderReference = database.collection("orders").doc();
+      }
+
+      try {
+        const cart = await loadTrustedCart(
+            database,
+            request.data && request.data.items,
+        );
+
+        if (paymentVerified) {
+          const paymentIntent = await stripe.paymentIntents.retrieve(
+              paymentIntentId,
+          );
+          if (paymentIntent.amount !== cart.totalInPence ||
+              paymentIntent.currency !== "gbp") {
+            throw new HttpsError(
+                "failed-precondition",
+                "The paid amount does not match the current order total.",
+            );
+          }
+        }
+
+        await orderReference.create({
+          userId: request.auth.uid,
+          items: cart.items,
+          subtotalInPence: cart.subtotalInPence,
+          shippingInPence: cart.shippingInPence,
+          totalInPence: cart.totalInPence,
+          deliveryAddress,
+          paymentMethod,
+          paymentStatus: paymentVerified ? "paid" : "pending",
+          stripePaymentIntentId: paymentVerified ? paymentIntentId : null,
+          status: "placed",
+          orderSource: "trusted_function",
+          createdAt: FieldValue.serverTimestamp(),
+        });
+      } catch (error) {
+        const existingOrder = await orderReference.get();
+        if (existingOrder.exists &&
+            existingOrder.get("userId") === request.auth.uid &&
+            existingOrder.get("orderSource") === "trusted_function") {
+          return {orderId: orderReference.id, existing: true};
+        }
+
+        if (paymentVerified) {
+          try {
+            await refundFailedStripeOrder(stripe, paymentIntentId);
+          } catch (refundError) {
+            console.error("Unable to refund failed order", {
+              paymentIntentId,
+              error: refundError,
+            });
+            throw new HttpsError(
+                "internal",
+                "The order could not be created. Contact support with your " +
+                "Stripe payment reference.",
+            );
+          }
+          throw new HttpsError(
+              "aborted",
+              "The order could not be created, so the payment was refunded.",
+          );
+        }
+        if (error instanceof HttpsError) throw error;
+        console.error("Unable to create order", error);
+        throw new HttpsError("internal", "The order could not be created.");
+      }
+
+      return {orderId: orderReference.id, existing: false};
+    },
+);
+
+exports.deleteProduct = onCall(
+    {region: "europe-west2"},
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Administrator sign-in required.");
+      }
+      const database = getFirestore();
+      await requireAdmin(database, request.auth.uid);
+
+      const productId = request.data && request.data.productId;
+      if (typeof productId !== "string" || productId.trim().length === 0 ||
+          productId.length > 200) {
+        throw new HttpsError("invalid-argument", "The product is invalid.");
+      }
+
+      const normalizedProductId = productId.trim();
+      const productReference = database.collection("products")
+          .doc(normalizedProductId);
+      const productSnapshot = await productReference.get();
+      if (!productSnapshot.exists) {
+        return {deleted: true, existing: false};
+      }
+
+      await getStorage().bucket().deleteFiles({
+        prefix: `products/${normalizedProductId}/`,
+        force: true,
+      });
+      await database.recursiveDelete(productReference);
+      return {deleted: true, existing: true};
+    },
+);
+
+async function deleteReviewAndUpdateAggregate(database, reviewReference) {
+  await database.runTransaction(async (transaction) => {
+    const reviewSnapshot = await transaction.get(reviewReference);
+    if (!reviewSnapshot.exists) return;
+
+    const productReference = reviewReference.parent.parent;
+    if (!productReference) {
+      transaction.delete(reviewReference);
+      return;
+    }
+    const productSnapshot = await transaction.get(productReference);
+    transaction.delete(reviewReference);
+    if (!productSnapshot.exists) return;
+
+    const rating = Number(reviewSnapshot.get("rating")) || 0;
+    const currentCount = Number(productSnapshot.get("ratingCount")) || 0;
+    const currentSum = Number(productSnapshot.get("ratingSum")) || 0;
+    const ratingCount = Math.max(0, currentCount - 1);
+    const ratingSum = Math.max(0, currentSum - rating);
+    transaction.update(productReference, {
+      ratingCount,
+      ratingSum,
+      averageRating: ratingCount === 0 ? 0 : ratingSum / ratingCount,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+}
+
+exports.deleteCustomerAccount = onCall(
+    {region: "europe-west2"},
+    async (request) => {
+      if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Sign in before deleting an account.");
+      }
+
+      const authenticatedAt = Number(request.auth.token.auth_time) * 1000;
+      if (!Number.isFinite(authenticatedAt) ||
+          Date.now() - authenticatedAt > 10 * 60 * 1000) {
+        throw new HttpsError(
+            "failed-precondition",
+            "Sign in again before deleting your account.",
+        );
+      }
+
+      const database = getFirestore();
+      const userId = request.auth.uid;
+      const userReference = database.collection("users").doc(userId);
+      const userSnapshot = await userReference.get();
+      if (userSnapshot.exists && userSnapshot.get("role") === "admin") {
+        throw new HttpsError(
+            "permission-denied",
+            "Administrator accounts must be removed through project administration.",
+        );
+      }
+
+      const reviewsSnapshot = await database.collectionGroup("reviews")
+          .where("userId", "==", userId)
+          .get();
+      for (const review of reviewsSnapshot.docs) {
+        await deleteReviewAndUpdateAggregate(database, review.ref);
+      }
+
+      const ordersSnapshot = await database.collection("orders")
+          .where("userId", "==", userId)
+          .get();
+      for (let start = 0; start < ordersSnapshot.docs.length; start += 400) {
+        const batch = database.batch();
+        for (const order of ordersSnapshot.docs.slice(start, start + 400)) {
+          batch.update(order.ref, {
+            userId: "deleted-customer",
+            deliveryAddress: "Deleted account",
+            customerDeletedAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        }
+        await batch.commit();
+      }
+
+      await database.recursiveDelete(userReference);
+      await getAuth().deleteUser(userId);
+      return {deleted: true};
     },
 );
 
@@ -432,7 +750,8 @@ exports.reserveOrderStock = onDocumentCreated(
           (order.paymentMethod === "Cash on delivery" &&
             order.paymentStatus === "pending") ||
           (order.paymentMethod === "Stripe card payment" &&
-            order.paymentStatus === "verification_pending" &&
+            (order.paymentStatus === "verification_pending" ||
+              order.paymentStatus === "paid") &&
             typeof order.stripePaymentIntentId === "string" &&
             order.stripePaymentIntentId.startsWith("pi_"));
         const validOrderDetails = !invalidSize &&

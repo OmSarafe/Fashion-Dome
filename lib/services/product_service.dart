@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:ecommerence_project/models/product.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -6,11 +7,15 @@ class ProductService {
   ProductService({
     FirebaseFirestore? firestore,
     FirebaseAuth? firebaseAuth,
+    FirebaseFunctions? functions,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
+        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        _functions =
+            functions ?? FirebaseFunctions.instanceFor(region: 'europe-west2');
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _firebaseAuth;
+  final FirebaseFunctions _functions;
 
   Stream<List<Product>> watchProducts() {
     return _firestore.collection('products').snapshots().map((snapshot) {
@@ -64,8 +69,10 @@ class ProductService {
     return reference.id;
   }
 
-  Future<void> deleteProduct(String productId) {
-    return _firestore.collection('products').doc(productId).delete();
+  Future<void> deleteProduct(String productId) async {
+    await _functions.httpsCallable('deleteProduct').call({
+      'productId': productId,
+    });
   }
 
   Future<bool> seedStarterProductsIfNeeded(List<Product> products) async {

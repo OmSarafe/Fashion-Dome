@@ -65,9 +65,10 @@ lib/
 ```
 
 Cloud Functions in `functions/index.js` perform trusted operations including
-payment creation and verification, refunds, inventory reservation, review
-submission and push-notification delivery. Firestore and Storage access is
-restricted by the rules in `firestore.rules` and `storage.rules`.
+payment creation and verification, idempotent order creation, compensating
+refunds, inventory reservation, account/product cleanup, review submission and
+push-notification delivery. Firestore and Storage access is restricted by the
+rules in `firestore.rules` and `storage.rules`.
 
 ## Data model
 
@@ -163,9 +164,10 @@ flutter test
 ```
 
 The automated suite covers authentication validators, cart calculations, role
-handling, customer/admin navigation, order lifecycle rules and responsive-layout
-breakpoints. Firebase integration, payment, notification and release flows must
-also be verified against the configured test project.
+handling, customer/admin navigation, order lifecycle rules, responsive-layout
+breakpoints and trusted order-input helpers. Firebase integration, payment,
+notification and release flows must also be verified against the configured test
+project.
 
 ## Security and privacy
 

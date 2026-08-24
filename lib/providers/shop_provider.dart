@@ -891,8 +891,6 @@ class ShopProvider extends ChangeNotifier {
     double? deliveryLatitude,
     double? deliveryLongitude,
     required String paymentMethod,
-    int shippingInPence = CartCalculator.standardShippingInPence,
-    String paymentStatus = 'pending',
     String? stripePaymentIntentId,
   }) async {
     if (isAdmin) {
@@ -925,14 +923,11 @@ class ShopProvider extends ChangeNotifier {
       deliveryLongitude: deliveryLongitude,
     );
 
-    final order = await _orderService.createOrder(
+    final order = await _orderService.submitOrder(
       userId: userId,
       items: _cartItems.values.toList(growable: false),
-      subtotalInPence: subtotalInPence,
-      shippingInPence: shippingInPence,
       deliveryAddress: trimmedAddress,
       paymentMethod: paymentMethod,
-      paymentStatus: paymentStatus,
       stripePaymentIntentId: stripePaymentIntentId,
     );
 

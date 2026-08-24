@@ -6,6 +6,7 @@ import 'package:ecommerence_project/services/stripe_payment_service.dart';
 import 'package:ecommerence_project/utils/cart_calculator.dart';
 import 'package:ecommerence_project/utils/currency_formatter.dart';
 import 'package:ecommerence_project/utils/responsive_layout.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:ecommerence_project/widgets/address_autocomplete_field.dart';
 import 'package:ecommerence_project/widgets/product_image.dart';
 import 'package:flutter/material.dart';
@@ -312,14 +313,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
         }
       }
 
-      final order = await context.read<ShopProvider>().placeOrder(
+      final order = await shop.placeOrder(
             deliveryAddress: deliveryAddress,
             deliveryLatitude: _selectedLocation?.latitude,
             deliveryLongitude: _selectedLocation?.longitude,
             paymentMethod: _paymentMethod,
-            shippingInPence: _shippingInPence,
-            paymentStatus:
-                stripePayment == null ? 'pending' : 'verification_pending',
             stripePaymentIntentId: stripePayment?.paymentIntentId,
           );
 
@@ -348,15 +346,21 @@ class _CheckoutPageState extends State<CheckoutPage> {
           ),
         ),
       );
+    } on FirebaseFunctionsException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            error.message ?? 'The order could not be completed. Please try again.',
+          ),
+        ),
+      );
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            stripePayment == null
-                ? 'Unable to place the order. Please try again.'
-                : 'Payment succeeded, but the order could not be saved. '
-                    'Please contact support.',
+            'Unable to place the order. Please try again.',
           ),
         ),
       );

@@ -24,7 +24,7 @@ service firebase.storage {
           '^.{1,180}[.](jpg|jpeg|JPG|JPEG|png|PNG|webp|WEBP|gif|GIF)$'
         );
 
-      allow delete: if isAdmin();
+      allow delete: if false;
     }
 
     match /{allPaths=**} {

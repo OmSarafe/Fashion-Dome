@@ -25,7 +25,7 @@ class CurrencyMigrationService {
 
     final productsSnapshot = await _firestore.collection('products').get();
     final ordersSnapshot = await _firestore.collection('orders').get();
-    final batch = _firestore.batch();
+    final pendingUpdates = <_MigrationUpdate>[];
 
     for (final productDocument in productsSnapshot.docs) {
       final data = productDocument.data();
@@ -43,7 +43,7 @@ class CurrencyMigrationService {
       }
       if (updates.isNotEmpty) {
         updates['updatedAt'] = FieldValue.serverTimestamp();
-        batch.update(productDocument.reference, updates);
+        pendingUpdates.add(_MigrationUpdate(productDocument.reference, updates));
       }
     }
 
@@ -80,15 +80,26 @@ class CurrencyMigrationService {
       }
 
       if (updates.isNotEmpty) {
-        batch.update(orderDocument.reference, updates);
+        pendingUpdates.add(_MigrationUpdate(orderDocument.reference, updates));
       }
     }
 
-    batch.update(userReference, {
+    const batchLimit = 400;
+    for (var start = 0; start < pendingUpdates.length; start += batchLimit) {
+      final batch = _firestore.batch();
+      final end = start + batchLimit < pendingUpdates.length
+          ? start + batchLimit
+          : pendingUpdates.length;
+      for (final update in pendingUpdates.sublist(start, end)) {
+        batch.update(update.reference, update.data);
+      }
+      await batch.commit();
+    }
+
+    await userReference.update({
       'currency': 'GBP',
       'currencyMigratedToGbpAt': FieldValue.serverTimestamp(),
     });
-    await batch.commit();
   }
 
   static void _moveMoneyField(
@@ -113,4 +124,11 @@ class CurrencyMigrationService {
       data[newKey] = oldValue is num ? oldValue.toInt() ~/ 100 : null;
     }
   }
+}
+
+class _MigrationUpdate {
+  const _MigrationUpdate(this.reference, this.data);
+
+  final DocumentReference<Map<String, dynamic>> reference;
+  final Map<String, dynamic> data;
 }

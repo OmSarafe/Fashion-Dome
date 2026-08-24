@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:ecommerence_project/services/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,13 +9,17 @@ class AuthService {
     FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
     GoogleSignIn? googleSignIn,
+    FirebaseFunctions? functions,
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _firestore = firestore ?? FirebaseFirestore.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        _functions =
+            functions ?? FirebaseFunctions.instanceFor(region: 'europe-west2');
 
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
   final GoogleSignIn _googleSignIn;
+  final FirebaseFunctions _functions;
 
   User? get currentUser => _firebaseAuth.currentUser;
 
@@ -131,8 +136,9 @@ class AuthService {
     }
 
     await _reauthenticate(user, password: password);
-    await _deleteUserData(user.uid);
-    await user.delete();
+    await user.getIdToken(true);
+    await _functions.httpsCallable('deleteCustomerAccount').call();
+    await _firebaseAuth.signOut();
     try {
       await _googleSignIn.signOut();
     } catch (_) {
@@ -173,37 +179,6 @@ class AuthService {
         idToken: googleAuthentication.idToken,
       ),
     );
-  }
-
-  Future<void> _deleteUserData(String userId) async {
-    final userReference = _firestore.collection('users').doc(userId);
-    final results = await Future.wait([
-      userReference.collection('favorites').get(),
-      userReference.collection('cart').get(),
-      _firestore.collection('orders').where('userId', isEqualTo: userId).get(),
-      _firestore
-          .collectionGroup('reviews')
-          .where('userId', isEqualTo: userId)
-          .get(),
-    ]);
-
-    final references = <DocumentReference<Object?>>[
-      for (final result in results)
-        for (final document in result.docs) document.reference,
-      userReference,
-    ];
-
-    const batchLimit = 400;
-    for (var start = 0; start < references.length; start += batchLimit) {
-      final end = start + batchLimit < references.length
-          ? start + batchLimit
-          : references.length;
-      final batch = _firestore.batch();
-      for (final reference in references.sublist(start, end)) {
-        batch.delete(reference);
-      }
-      await batch.commit();
-    }
   }
 
   Future<void> signOut() async {

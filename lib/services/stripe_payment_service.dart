@@ -59,14 +59,6 @@ class StripePaymentService {
     );
     await Stripe.instance.presentPaymentSheet();
 
-    final verification = await _functions
-        .httpsCallable('verifyStripePayment')
-        .call(<String, dynamic>{'paymentIntentId': paymentIntentId});
-    final verifiedData = Map<String, dynamic>.from(verification.data as Map);
-    if (verifiedData['paid'] != true) {
-      throw StateError('Stripe could not confirm this payment.');
-    }
-
     return StripePaymentResult(
       paymentIntentId: paymentIntentId,
       totalInPence: totalInPence,

@@ -1,6 +1,6 @@
 # MSc Clothing E-commerce — Progress Checkpoint
 
-Last updated: 7 August 2026
+Last updated: 25 August 2026
 
 ## Completed
 
@@ -21,10 +21,15 @@ Last updated: 7 August 2026
 - First-time Google users receive a Firestore customer profile without overwriting existing admin roles
 - My Details screen connected to Firestore with prefilled name/email and editable name, phone, date of birth, and gender
 - My Details changes persist in Firestore and update the Account screen
-- GDPR-friendly account deletion with secure reauthentication and removal of the user's profile, favourites, cart, orders, and Firebase Authentication account
+- GDPR-friendly account deletion with secure reauthentication, removal of the user's profile, favourites, cart, reviews and Firebase Authentication account, plus anonymisation of historical orders
 - Saved delivery address shared between My Details and Checkout
 - Transactional Cloud Function for one-time product stock reservation when an order is created
 - Automatic cancellation metadata for invalid orders or insufficient stock
+- Trusted Cloud Function order creation for cash-on-delivery and Stripe orders
+- One-order-per-Payment-Intent enforcement with automatic compensating refunds
+- Backend account deletion with order anonymisation and rating reconciliation
+- Backend product deletion including Storage images and nested Firestore data
+- Chunked currency migration beyond Firestore's single-batch limit
 
 ## Verified manually
 
@@ -46,11 +51,8 @@ Last updated: 7 August 2026
 - Checkout address saved and prefilled when Checkout was reopened
 - Stock reservation verified: a newly placed order was marked `reserved` and product stock reduced exactly once
 
-## Next step
+## Submission status
 
-Audit and improve unfinished screens and navigation:
-
-1. Identify legacy placeholder screens and broken or confusing navigation links.
-2. Connect the Address screen to the saved Firestore delivery address.
-3. Make the customer navigation and Account options consistent.
-4. Run the app and test the revised customer journey.
+The functional Android prototype and release packaging are complete. Remaining
+work is submission evidence, the formal testing report, dissertation content,
+demonstration video, presentation and viva preparation.

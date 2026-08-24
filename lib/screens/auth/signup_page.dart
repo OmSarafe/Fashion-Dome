@@ -3,7 +3,6 @@ import 'package:ecommerence_project/screens/navigation/bottom_nav_bar_page.dart'
 import 'package:ecommerence_project/services/auth_service.dart';
 import 'package:ecommerence_project/utils/auth_validators.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';

@@ -1,6 +1,6 @@
 # Fashion Dome Privacy Policy
 
-Last updated: 18 August 2026
+Last updated: 25 August 2026
 
 ## Who we are
 
@@ -60,8 +60,10 @@ on delivery does not send card information to Stripe.
 Application data is kept while your account is active and as needed to provide
 the service. You can choose **Account > Delete account** and confirm your
 identity. This removes the Firebase Authentication account and associated
-profile, notification tokens, cart, favourites, orders and reviews from the
-application database. You may also contact us for assistance.
+profile, notification tokens, cart, favourites and reviews from the application
+database. Historical orders are retained only as anonymised transaction and
+inventory records: the customer identifier and delivery address are replaced
+with non-identifying deletion markers. You may also contact us for assistance.
 
 External providers may retain limited transaction, security, backup or legal
 records under their own retention obligations.

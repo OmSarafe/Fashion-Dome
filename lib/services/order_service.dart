@@ -1,12 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:ecommerence_project/models/cart_item.dart';
 import 'package:ecommerence_project/models/order.dart' as shop;
 
 class OrderService {
-  OrderService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+  OrderService({
+    FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
+  })  : _firestore = firestore ?? FirebaseFirestore.instance,
+        _functions =
+            functions ?? FirebaseFunctions.instanceFor(region: 'europe-west2');
 
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
   Stream<List<shop.Order>> watchOrders(String userId) {
     return _firestore
@@ -36,32 +42,40 @@ class OrderService {
     });
   }
 
-  Future<shop.Order> createOrder({
+  Future<shop.Order> submitOrder({
     required String userId,
     required List<CartItem> items,
-    required int subtotalInPence,
-    required int shippingInPence,
     required String deliveryAddress,
     required String paymentMethod,
-    String paymentStatus = 'pending',
     String? stripePaymentIntentId,
   }) async {
-    final reference = _firestore.collection('orders').doc();
-    final order = shop.Order(
-      id: reference.id,
-      userId: userId,
-      items: items,
-      subtotalInPence: subtotalInPence,
-      shippingInPence: shippingInPence,
-      totalInPence: subtotalInPence + shippingInPence,
-      deliveryAddress: deliveryAddress,
-      paymentMethod: paymentMethod,
-      paymentStatus: paymentStatus,
-      stripePaymentIntentId: stripePaymentIntentId,
-      createdAt: DateTime.now(),
-    );
-    await reference.set(order.toMap());
-    return order;
+    final response = await _functions.httpsCallable('submitOrder').call({
+      'items': items
+          .map(
+            (item) => {
+              'productId': item.product.id,
+              'size': item.size,
+              'quantity': item.quantity,
+            },
+          )
+          .toList(growable: false),
+      'deliveryAddress': deliveryAddress,
+      'paymentMethod': paymentMethod,
+      if (stripePaymentIntentId != null)
+        'paymentIntentId': stripePaymentIntentId,
+    });
+    final data = Map<String, dynamic>.from(response.data as Map);
+    final orderId = data['orderId'] as String? ?? '';
+    if (orderId.isEmpty) {
+      throw StateError('The server did not return an order reference.');
+    }
+
+    final snapshot = await _firestore.collection('orders').doc(orderId).get();
+    final orderData = snapshot.data();
+    if (!snapshot.exists || orderData == null || orderData['userId'] != userId) {
+      throw StateError('The saved order could not be loaded.');
+    }
+    return shop.Order.fromMap(snapshot.id, orderData);
   }
 
   Future<void> updateOrderStatus({
