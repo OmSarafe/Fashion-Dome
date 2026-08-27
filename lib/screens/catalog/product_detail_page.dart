@@ -1,5 +1,8 @@
 import 'package:ecommerence_project/models/product.dart';
 import 'package:ecommerence_project/providers/shop_provider.dart';
+import 'package:ecommerence_project/screens/account/fit_profile_page.dart';
+import 'package:ecommerence_project/services/fit_profile_service.dart';
+import 'package:ecommerence_project/services/fit_recommendation_service.dart';
 import 'package:ecommerence_project/utils/currency_formatter.dart';
 import 'package:ecommerence_project/utils/responsive_layout.dart';
 import 'package:ecommerence_project/widgets/product_image.dart';
@@ -18,11 +21,145 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   late String _selectedSize;
+  final _fitProfileService = FitProfileService();
+  final _fitRecommendationService = FitRecommendationService();
 
   @override
   void initState() {
     super.initState();
     _selectedSize = widget.product.availableSizes.first;
+  }
+
+  Future<void> _findMySize(Product product) async {
+    var profile = await _fitProfileService.loadProfile();
+    if (!mounted) return;
+
+    if (profile == null) {
+      final createProfile = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          icon: const Icon(Icons.straighten_outlined),
+          title: const Text('Create your Fit Profile'),
+          content: const Text(
+            'Add your measurements once, then Fashion Dome can explain '
+            'which available size may suit you. Your data stays on this device.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Not now'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Create profile'),
+            ),
+          ],
+        ),
+      );
+      if (createProfile != true || !mounted) return;
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const FitProfilePage()),
+      );
+      if (!mounted) return;
+      profile = await _fitProfileService.loadProfile();
+      if (!mounted || profile == null) return;
+    }
+
+    final recommendation = _fitRecommendationService.recommend(
+      profile: profile,
+      product: product,
+    );
+    if (recommendation == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Size guidance is not available for this product.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _selectedSize = recommendation.recommendedSize);
+    final colors = Theme.of(context).colorScheme;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Your size guidance',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 18),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Recommended size',
+                      style: TextStyle(color: colors.onPrimaryContainer),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      recommendation.recommendedSize,
+                      style: TextStyle(
+                        color: colors.onPrimaryContainer,
+                        fontSize: 34,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      recommendation.confidence.label,
+                      style: TextStyle(
+                        color: colors.onPrimaryContainer,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                recommendation.explanation,
+                style: const TextStyle(height: 1.5),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Guidance only: brand, material and product cut can affect fit.',
+                style: TextStyle(
+                  color: colors.onSurfaceVariant,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: FilledButton(
+                  onPressed: () => Navigator.pop(sheetContext),
+                  child: Text('Use size ${recommendation.recommendedSize}'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -153,9 +290,19 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                'Select size',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Select size',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _findMySize(product),
+                    icon: const Icon(Icons.straighten_outlined),
+                    label: const Text('Find my size'),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               Wrap(

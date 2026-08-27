@@ -1,5 +1,6 @@
 import 'package:ecommerence_project/screens/account/faq_page.dart';
 import 'package:ecommerence_project/screens/account/appearance_page.dart';
+import 'package:ecommerence_project/screens/account/fit_profile_page.dart';
 import 'package:ecommerence_project/screens/account/help_center_page.dart';
 import 'package:ecommerence_project/screens/account/my_orders_page.dart';
 import 'package:ecommerence_project/screens/account/notification_settings_page.dart';
@@ -259,6 +260,16 @@ class _AccountState extends State<Account> {
               );
             }),
             if (!shop.isAdmin) ...[
+              divider(),
+              buildMenuItem(Icons.straighten_outlined, "My Fit Profile",
+                  onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FitProfilePage(),
+                  ),
+                );
+              }),
               divider(),
               buildMenuItem(Icons.home_outlined, "Address Book", onTap: () {
                 Navigator.push(

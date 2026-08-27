@@ -1,6 +1,6 @@
 # MSc Clothing E-commerce — Progress Checkpoint
 
-Last updated: 25 August 2026
+Last updated: 27 August 2026
 
 ## Completed
 
@@ -30,6 +30,10 @@ Last updated: 25 August 2026
 - Backend account deletion with order anonymisation and rating reconciliation
 - Backend product deletion including Storage images and nested Firestore data
 - Chunked currency migration beyond Firestore's single-batch limit
+- Local-only My Fit Profile with height, chest, waist and preferred-fit settings
+- Explainable size recommendations for T-shirts, shirts, jackets and jeans
+- Automatic selection of the closest available recommended product size
+- Fit Profile validation, deletion, privacy notice and sizing disclaimer
 
 ## Verified manually
 
@@ -50,6 +54,12 @@ Last updated: 25 August 2026
 - End-to-end order notification verified: Firestore status update triggered the Cloud Function and reached the customer app
 - Checkout address saved and prefilled when Checkout was reopened
 - Stock reservation verified: a newly placed order was marked `reserved` and product stock reduced exactly once
+- My Fit Profile save and confirmation verified on the Android emulator
+- T-shirt recommendation verified as size M for a 100 cm chest and regular fit
+- Recommended size automatically selected and retained when added to the cart
+- Jeans recommendation verified as size 32 for an 82 cm waist
+- Full Flutter automated test suite passed after the Fit Profile addition
+- Flutter static analysis passed with no errors
 
 ## Submission status
 

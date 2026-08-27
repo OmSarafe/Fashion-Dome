@@ -19,6 +19,7 @@ and light and dark themes.
 - GDPR-friendly account deletion with reauthentication and data removal
 - Live product catalogue with categories, search, sorting and filters
 - Product details, stock information, sizes, ratings and customer reviews
+- Privacy-preserving Fit Profile with explainable clothing-size recommendations
 - Persistent favourites and shopping cart
 - Address autocomplete, manual address entry and Google Maps location selection
 - Cash-on-delivery and Stripe test-card checkout
@@ -48,6 +49,7 @@ and light and dark themes.
 - Stripe test-mode Payment Sheet
 - Google Maps, Places autocomplete and geocoding
 - Cached network images
+- Shared Preferences for on-device onboarding and Fit Profile storage
 
 ## Architecture
 
@@ -165,9 +167,9 @@ flutter test
 
 The automated suite covers authentication validators, cart calculations, role
 handling, customer/admin navigation, order lifecycle rules, responsive-layout
-breakpoints and trusted order-input helpers. Firebase integration, payment,
-notification and release flows must also be verified against the configured test
-project.
+breakpoints, trusted order-input helpers, Fit Profile persistence and explainable
+size-recommendation rules. Firebase integration, payment, notification and
+release flows must also be verified against the configured test project.
 
 ## Security and privacy
 
@@ -178,6 +180,8 @@ project.
   trusted Cloud Functions, not only by the interface.
 - Stripe handles card details; the application stores payment references rather
   than card numbers.
+- Fit Profile measurements remain in local device storage and are not uploaded
+  to Firebase. Recommendations are guidance rather than a guaranteed fit.
 - Product uploads are restricted by role, file type and size.
 - Customers can view/edit their profile and permanently delete their Firebase
   account and associated application data.
