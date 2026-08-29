@@ -39,7 +39,6 @@ class ShopProvider extends ChangeNotifier {
     _watchCategories();
     _authSubscription =
         _firebaseAuth.authStateChanges().listen(_handleAuthStateChanged);
-    unawaited(_seedStarterProducts());
   }
 
   final ProductService _productService;
@@ -59,6 +58,7 @@ class ShopProvider extends ChangeNotifier {
   StreamSubscription<List<Order>>? _adminOrderSubscription;
   StreamSubscription<UserProfile?>? _profileSubscription;
   String? _activeUserId;
+  String? _catalogSeedAttemptedForUserId;
 
   static const List<Product> _starterProducts = [
     Product(
@@ -473,7 +473,7 @@ class ShopProvider extends ChangeNotifier {
     if (_activeUserId == userId) return;
 
     _activeUserId = userId;
-    if (userId != null) unawaited(_seedStarterProducts());
+    _catalogSeedAttemptedForUserId = null;
     unawaited(_cartSubscription?.cancel());
     unawaited(_favoriteSubscription?.cancel());
     unawaited(_orderSubscription?.cancel());
@@ -513,6 +513,11 @@ class ShopProvider extends ChangeNotifier {
         _isLoadingProfile = false;
         _profileError = null;
         _updateAdminOrderSubscription(profile);
+        if (profile?.isAdmin == true &&
+            _catalogSeedAttemptedForUserId != userId) {
+          _catalogSeedAttemptedForUserId = userId;
+          unawaited(_seedStarterProducts());
+        }
         notifyListeners();
       },
       onError: (Object error) {

@@ -314,12 +314,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
       }
 
       final order = await shop.placeOrder(
-            deliveryAddress: deliveryAddress,
-            deliveryLatitude: _selectedLocation?.latitude,
-            deliveryLongitude: _selectedLocation?.longitude,
-            paymentMethod: _paymentMethod,
-            stripePaymentIntentId: stripePayment?.paymentIntentId,
-          );
+        deliveryAddress: deliveryAddress,
+        deliveryLatitude: _selectedLocation?.latitude,
+        deliveryLongitude: _selectedLocation?.longitude,
+        paymentMethod: _paymentMethod,
+        stripePaymentIntentId: stripePayment?.paymentIntentId,
+      );
 
       if (!mounted) return;
       await showDialog<void>(
@@ -351,7 +351,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            error.message ?? 'The order could not be completed. Please try again.',
+            error.message ??
+                'The order could not be completed. Please try again.',
           ),
         ),
       );

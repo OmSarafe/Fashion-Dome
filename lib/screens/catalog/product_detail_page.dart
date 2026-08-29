@@ -8,6 +8,7 @@ import 'package:ecommerence_project/utils/responsive_layout.dart';
 import 'package:ecommerence_project/widgets/product_image.dart';
 import 'package:ecommerence_project/widgets/product_reviews_section.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 
 class ProductDetailPage extends StatefulWidget {
@@ -20,18 +21,22 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
-  late String _selectedSize;
+  String? _selectedSize;
   final _fitProfileService = FitProfileService();
   final _fitRecommendationService = FitRecommendationService();
 
   @override
   void initState() {
     super.initState();
-    _selectedSize = widget.product.availableSizes.first;
+    _selectedSize = widget.product.availableSizes.isEmpty
+        ? null
+        : widget.product.availableSizes.first;
   }
 
   Future<void> _findMySize(Product product) async {
-    var profile = await _fitProfileService.loadProfile();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) return;
+    var profile = await _fitProfileService.loadProfile(userId: userId);
     if (!mounted) return;
 
     if (profile == null) {
@@ -63,7 +68,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         MaterialPageRoute(builder: (_) => const FitProfilePage()),
       );
       if (!mounted) return;
-      profile = await _fitProfileService.loadProfile();
+      profile = await _fitProfileService.loadProfile(userId: userId);
       if (!mounted || profile == null) return;
     }
 
@@ -171,6 +176,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     );
     final isFavorite = shop.isFavorite(product.id);
     final canAddToCart = shop.canAddProduct(product);
+    final selectedSize = product.availableSizes.contains(_selectedSize)
+        ? _selectedSize
+        : product.availableSizes.isEmpty
+            ? null
+            : product.availableSizes.first;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -298,47 +308,57 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   TextButton.icon(
-                    onPressed: () => _findMySize(product),
+                    onPressed: product.availableSizes.isEmpty
+                        ? null
+                        : () => _findMySize(product),
                     icon: const Icon(Icons.straighten_outlined),
                     label: const Text('Find my size'),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: product.availableSizes.map((size) {
-                  final selected = _selectedSize == size;
-                  final colors = Theme.of(context).colorScheme;
-                  return SizedBox(
-                    width: 52,
-                    height: 44,
-                    child: ChoiceChip(
-                      label: SizedBox(
-                        width: double.infinity,
-                        child: Text(size, textAlign: TextAlign.center),
-                      ),
-                      selected: selected,
-                      showCheckmark: false,
-                      selectedColor: colors.primary,
-                      backgroundColor: colors.surface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          color: selected ? colors.primary : colors.outline,
+              if (product.availableSizes.isEmpty)
+                Text(
+                  'No sizes are currently available for this product.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: product.availableSizes.map((size) {
+                    final selected = selectedSize == size;
+                    final colors = Theme.of(context).colorScheme;
+                    return SizedBox(
+                      width: 52,
+                      height: 44,
+                      child: ChoiceChip(
+                        label: SizedBox(
+                          width: double.infinity,
+                          child: Text(size, textAlign: TextAlign.center),
                         ),
+                        selected: selected,
+                        showCheckmark: false,
+                        selectedColor: colors.primary,
+                        backgroundColor: colors.surface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          side: BorderSide(
+                            color: selected ? colors.primary : colors.outline,
+                          ),
+                        ),
+                        labelPadding: EdgeInsets.zero,
+                        labelStyle: TextStyle(
+                          color: selected ? colors.onPrimary : colors.onSurface,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        onSelected: (_) => setState(() => _selectedSize = size),
                       ),
-                      labelPadding: EdgeInsets.zero,
-                      labelStyle: TextStyle(
-                        color: selected ? colors.onPrimary : colors.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onSelected: (_) => setState(() => _selectedSize = size),
-                    ),
-                  );
-                }).toList(),
-              ),
+                    );
+                  }).toList(),
+                ),
               const SizedBox(height: 30),
               ProductReviewsSection(product: product),
             ],
@@ -357,17 +377,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: SizedBox(
               height: 54,
               child: FilledButton.icon(
-                onPressed: canAddToCart
+                onPressed: canAddToCart && selectedSize != null
                     ? () {
                         final added = context.read<ShopProvider>().addToCart(
                               product,
-                              size: _selectedSize,
+                              size: selectedSize,
                             );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
                               added
-                                  ? '${product.name} ($_selectedSize) added to cart.'
+                                  ? '${product.name} ($selectedSize) added to cart.'
                                   : 'The available stock is already in your cart.',
                             ),
                           ),
@@ -378,9 +398,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 label: Text(
                   !product.isInStock
                       ? 'Out of stock'
-                      : canAddToCart
+                      : canAddToCart && selectedSize != null
                           ? 'Add to cart · ${formatPounds(product.priceInPence)}'
-                          : 'Maximum stock in cart',
+                          : selectedSize == null
+                              ? 'No size available'
+                              : 'Maximum stock in cart',
                 ),
               ),
             ),

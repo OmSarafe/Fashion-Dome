@@ -72,7 +72,9 @@ class OrderService {
 
     final snapshot = await _firestore.collection('orders').doc(orderId).get();
     final orderData = snapshot.data();
-    if (!snapshot.exists || orderData == null || orderData['userId'] != userId) {
+    if (!snapshot.exists ||
+        orderData == null ||
+        orderData['userId'] != userId) {
       throw StateError('The saved order could not be loaded.');
     }
     return shop.Order.fromMap(snapshot.id, orderData);

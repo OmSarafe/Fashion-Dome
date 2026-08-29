@@ -12,6 +12,7 @@ import 'package:ecommerence_project/screens/account/my_details_page.dart';
 import 'package:ecommerence_project/screens/checkout/payment_page.dart';
 import 'package:ecommerence_project/providers/shop_provider.dart';
 import 'package:ecommerence_project/services/auth_service.dart';
+import 'package:ecommerence_project/services/fit_profile_service.dart';
 import 'package:ecommerence_project/utils/responsive_layout.dart';
 import 'package:ecommerence_project/widgets/basicwidget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,6 +29,7 @@ class Account extends StatefulWidget {
 class _AccountState extends State<Account> {
   Future<void> _deleteAccount() async {
     final authService = AuthService();
+    final userId = authService.currentUser?.uid;
     final usesPassword = authService.currentUserUsesPassword;
     final passwordController = TextEditingController();
     final rootNavigator = Navigator.of(context, rootNavigator: true);
@@ -101,6 +103,9 @@ class _AccountState extends State<Account> {
       await authService.deleteCurrentAccount(
         password: usesPassword ? passwordController.text : null,
       );
+      if (userId != null) {
+        await FitProfileService().deleteProfile(userId: userId);
+      }
       if (!rootNavigator.mounted) return;
       rootNavigator.pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -292,8 +297,8 @@ class _AccountState extends State<Account> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        NotificationSettingsPage()), // Replace SecondPage with your target widget
+                  builder: (_) => const NotificationSettingsPage(),
+                ),
               );
             }),
             divider(),
@@ -321,8 +326,8 @@ class _AccountState extends State<Account> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        Faqpage()), // Replace SecondPage with your target widget
+                  builder: (_) => const Faqpage(),
+                ),
               );
             }),
             divider(),
@@ -330,8 +335,8 @@ class _AccountState extends State<Account> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        HelpcenterPage()), // Replace SecondPage with your target widget
+                  builder: (_) => const HelpcenterPage(),
+                ),
               );
             }),
             _sectionGap(),

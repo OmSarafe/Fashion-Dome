@@ -21,7 +21,7 @@ class PrivacyPolicyPage extends StatelessWidget {
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.w700),
               ),
               SizedBox(height: 6),
-              Text('Last updated: 25 August 2026'),
+              Text('Last updated: 29 August 2026'),
               SizedBox(height: 22),
               _PolicySection(
                 title: 'Who we are',
@@ -31,12 +31,12 @@ class PrivacyPolicyPage extends StatelessWidget {
               _PolicySection(
                 title: 'Information we process',
                 body:
-                    'Depending on the features you use, we process your Firebase user ID, name, email address, sign-in provider, optional phone number, gender and date of birth; delivery address and a map pin you choose; cart, favourites, orders, selected sizes, payment status and method; reviews, ratings and comments; notification preferences and device messaging tokens. Theme and onboarding preferences are stored locally on your device. Administrators may upload product images and catalogue information.',
+                    'Depending on the features you use, we process your Firebase user ID, name, email address, sign-in provider, optional phone number, gender and date of birth; delivery address and a map pin you choose; cart, favourites, orders, selected sizes, payment status and method; reviews, ratings and comments; notification preferences and device messaging tokens. Theme and onboarding preferences are stored locally on your device. Optional Fit Profile measurements (height, chest and waist) and fit preference are stored only on the device, separated by signed-in user, and are not uploaded to Firebase. Administrators may upload product images and catalogue information.',
               ),
               _PolicySection(
                 title: 'How we use information',
                 body:
-                    'We use this information to create and secure accounts, provide the catalogue, save preferences, process and track orders, calculate stock, support test payments, deliver notifications, show addresses and map suggestions, publish reviews, provide customer support and administer the service. Processing is based on providing the service you request, your choices and consent where applicable, and legitimate interests in security, fraud prevention and service administration.',
+                    'We use this information to create and secure accounts, provide the catalogue, save preferences, process and track orders, calculate stock, support test payments, deliver notifications, show addresses and map suggestions, publish reviews, provide customer support and administer the service. If you create a Fit Profile, its local measurements are used only to provide explainable size guidance for products. Processing is based on providing the service you request, your choices and consent where applicable, and legitimate interests in security, fraud prevention and service administration.',
               ),
               _PolicySection(
                 title: 'Service providers and sharing',
@@ -51,7 +51,7 @@ class PrivacyPolicyPage extends StatelessWidget {
               _PolicySection(
                 title: 'Retention and account deletion',
                 body:
-                    'Application data is kept while your account is active and as needed to provide the service. You can choose Account > Delete account and confirm your identity. This removes the Firebase Authentication account and associated profile, notification tokens, cart, favourites and reviews from the application database. Historical orders are retained only as anonymised transaction and inventory records: the customer identifier and delivery address are replaced with non-identifying deletion markers. You may also contact us for assistance. External providers may retain limited transaction, security, backup or legal records under their own retention obligations.',
+                    'Application data is kept while your account is active and as needed to provide the service. You can delete local measurements at any time from My Fit Profile. You can also choose Account > Delete account and confirm your identity. This removes the local Fit Profile, Firebase Authentication account and associated profile, notification tokens, cart, favourites and reviews from the application database. Historical orders are retained only as anonymised transaction and inventory records: the customer identifier and delivery address are replaced with non-identifying deletion markers. You may also contact us for assistance. External providers may retain limited transaction, security, backup or legal records under their own retention obligations.',
               ),
               _PolicySection(
                 title: 'Security',

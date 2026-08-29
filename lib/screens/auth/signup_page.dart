@@ -1,4 +1,5 @@
 import 'package:ecommerence_project/screens/auth/login_page.dart';
+import 'package:ecommerence_project/screens/account/privacy_policy_page.dart';
 import 'package:ecommerence_project/screens/navigation/bottom_nav_bar_page.dart';
 import 'package:ecommerence_project/services/auth_service.dart';
 import 'package:ecommerence_project/utils/auth_validators.dart';
@@ -18,13 +19,12 @@ class _SignupPageState extends State<SignupPage> {
   final _textController = TextEditingController();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
-  bool appPinObscureText = true; // add this line
+  bool appPinObscureText = true;
   final _loginFormKey = GlobalKey<FormState>();
   final _authService = AuthService();
   bool _isLoading = false;
 
   void _toggleAppPinView() {
-    // add this method
     setState(() {
       appPinObscureText = !appPinObscureText;
     });
@@ -217,13 +217,29 @@ class _SignupPageState extends State<SignupPage> {
                       validator: AuthValidators.strongPassword,
                     ),
                     const SizedBox(height: 12),
-                    Text(
-                      'By signing up, you agree to our Terms, Privacy Policy and Cookie Use.',
-                      style: TextStyle(
-                        height: 1.4,
-                        fontSize: 13,
-                        color: colors.onSurfaceVariant,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Learn how Fashion Dome handles your information.',
+                            style: TextStyle(
+                              height: 1.4,
+                              fontSize: 13,
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const PrivacyPolicyPage(),
+                            ),
+                          ),
+                          child: const Text('Privacy Policy'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
                     SizedBox(

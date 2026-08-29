@@ -3,7 +3,6 @@ import 'package:ecommerence_project/services/onboarding_service.dart';
 import 'package:ecommerence_project/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class OnBoarding extends StatefulWidget {
   const OnBoarding({super.key});
@@ -74,12 +73,13 @@ class _OnBoardingState extends State<OnBoarding> {
                   top: compactHeight ? 8 : 20,
                   child: Text(
                     'Define yourself in\nyour unique way.',
-                    style: GoogleFonts.manrope(
+                    style: TextStyle(
+                      fontFamily: 'GeneralSans',
                       color: Colors.black,
                       fontSize: titleSize,
                       height: 0.91,
                       letterSpacing: -2.2,
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),

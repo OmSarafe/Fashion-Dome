@@ -43,7 +43,8 @@ class CurrencyMigrationService {
       }
       if (updates.isNotEmpty) {
         updates['updatedAt'] = FieldValue.serverTimestamp();
-        pendingUpdates.add(_MigrationUpdate(productDocument.reference, updates));
+        pendingUpdates
+            .add(_MigrationUpdate(productDocument.reference, updates));
       }
     }
 

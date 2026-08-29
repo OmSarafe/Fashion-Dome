@@ -10,14 +10,14 @@ subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 
     // Some Flutter plugins still declare an older Kotlin Gradle plugin even
-    // though their Android dependencies are compiled with Kotlin 2.1. Keep
+    // though their Android dependencies use newer Kotlin metadata. Keep
     // every Android subproject on one compatible compiler version.
     buildscript {
         configurations.configureEach {
             resolutionStrategy.eachDependency { details ->
                 if (details.requested.group == "org.jetbrains.kotlin" &&
                     details.requested.name == "kotlin-gradle-plugin") {
-                    details.useVersion("2.1.10")
+                    details.useVersion("2.2.20")
                 }
             }
         }

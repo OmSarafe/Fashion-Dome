@@ -111,8 +111,8 @@ class ResponsiveBottomBar extends StatelessWidget {
       child: SizedBox(
         width: math.min(screenWidth, maxWidth),
         child: Padding(
-          padding: padding ??
-              EdgeInsets.fromLTRB(horizontal, 12, horizontal, 16),
+          padding:
+              padding ?? EdgeInsets.fromLTRB(horizontal, 12, horizontal, 16),
           child: child,
         ),
       ),

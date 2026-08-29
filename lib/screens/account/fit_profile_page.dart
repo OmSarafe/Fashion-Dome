@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../models/fit_profile.dart';
 import '../../services/fit_profile_service.dart';
 import '../../utils/responsive_layout.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class FitProfilePage extends StatefulWidget {
   const FitProfilePage({super.key});
@@ -18,6 +19,7 @@ class _FitProfilePageState extends State<FitProfilePage> {
   final _chestController = TextEditingController();
   final _waistController = TextEditingController();
   final _profileService = FitProfileService();
+  final String? _userId = FirebaseAuth.instance.currentUser?.uid;
 
   FitPreference _fitPreference = FitPreference.regular;
   bool _isLoading = true;
@@ -39,7 +41,12 @@ class _FitProfilePageState extends State<FitProfilePage> {
   }
 
   Future<void> _loadProfile() async {
-    final profile = await _profileService.loadProfile();
+    final userId = _userId;
+    if (userId == null) {
+      if (mounted) setState(() => _isLoading = false);
+      return;
+    }
+    final profile = await _profileService.loadProfile(userId: userId);
     if (!mounted) return;
 
     if (profile != null) {
@@ -54,6 +61,8 @@ class _FitProfilePageState extends State<FitProfilePage> {
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
+    final userId = _userId;
+    if (userId == null) return;
 
     setState(() => _isSaving = true);
     final profile = FitProfile(
@@ -64,7 +73,7 @@ class _FitProfilePageState extends State<FitProfilePage> {
     );
 
     try {
-      await _profileService.saveProfile(profile);
+      await _profileService.saveProfile(userId: userId, profile: profile);
       if (!mounted) return;
       setState(() => _hasSavedProfile = true);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,6 +87,8 @@ class _FitProfilePageState extends State<FitProfilePage> {
   }
 
   Future<void> _deleteProfile() async {
+    final userId = _userId;
+    if (userId == null) return;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -99,7 +110,7 @@ class _FitProfilePageState extends State<FitProfilePage> {
     );
     if (confirmed != true) return;
 
-    await _profileService.deleteProfile();
+    await _profileService.deleteProfile(userId: userId);
     if (!mounted) return;
     _heightController.clear();
     _chestController.clear();
@@ -147,173 +158,183 @@ class _FitProfilePageState extends State<FitProfilePage> {
       appBar: AppBar(title: const Text('My Fit Profile')),
       body: ResponsiveContent(
         maxWidth: 760,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.only(top: 16, bottom: 32),
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: colors.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.lock_outline, color: colors.primary),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Private by design',
-                                  style: TextStyle(
-                                    color: colors.onPrimaryContainer,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+        child: _userId == null
+            ? const Center(
+                child: Text('Sign in to create and use a Fit Profile.'),
+              )
+            : _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Form(
+                    key: _formKey,
+                    child: ListView(
+                      padding: const EdgeInsets.only(top: 16, bottom: 32),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: colors.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.lock_outline, color: colors.primary),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Private by design',
+                                      style: TextStyle(
+                                        color: colors.onPrimaryContainer,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Your measurements stay on this device. '
+                                      'They are not uploaded to Fashion Dome '
+                                      'or Firebase.',
+                                      style: TextStyle(
+                                        color: colors.onPrimaryContainer,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Your measurements stay on this device. '
-                                  'They are not uploaded to Fashion Dome '
-                                  'or Firebase.',
-                                  style: TextStyle(
-                                    color: colors.onPrimaryContainer,
-                                    height: 1.4,
-                                  ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        const Text(
+                          'Your measurements',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'These details help the app explain which available size may suit you.',
+                          style: TextStyle(color: colors.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: _heightController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]')),
+                            LengthLimitingTextInputFormatter(5),
+                          ],
+                          decoration: _fieldDecoration(
+                            'Height',
+                            'Measure without shoes.',
+                          ),
+                          validator: (value) =>
+                              _validateMeasurement(value, 'height', 120, 230),
+                        ),
+                        const SizedBox(height: 18),
+                        TextFormField(
+                          controller: _chestController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]')),
+                            LengthLimitingTextInputFormatter(5),
+                          ],
+                          decoration: _fieldDecoration(
+                            'Chest',
+                            'Measure around the fullest part.',
+                          ),
+                          validator: (value) =>
+                              _validateMeasurement(value, 'chest', 60, 160),
+                        ),
+                        const SizedBox(height: 18),
+                        TextFormField(
+                          controller: _waistController,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                                RegExp(r'[0-9.]')),
+                            LengthLimitingTextInputFormatter(5),
+                          ],
+                          decoration: _fieldDecoration(
+                            'Waist',
+                            'Measure where you normally wear trousers.',
+                          ),
+                          validator: (value) =>
+                              _validateMeasurement(value, 'waist', 50, 150),
+                        ),
+                        const SizedBox(height: 18),
+                        DropdownButtonFormField<FitPreference>(
+                          value: _fitPreference,
+                          decoration: const InputDecoration(
+                            labelText: 'Preferred fit',
+                            helperText: 'Choose how you like clothes to feel.',
+                            border: OutlineInputBorder(),
+                          ),
+                          items: FitPreference.values
+                              .map(
+                                (preference) => DropdownMenuItem(
+                                  value: preference,
+                                  child: Text(preference.label),
                                 ),
-                              ],
-                            ),
+                              )
+                              .toList(),
+                          onChanged: (preference) {
+                            if (preference != null) {
+                              setState(() => _fitPreference = preference);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 22),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: colors.outlineVariant),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'Size recommendations are guidance only. Brand, '
+                            'material and product cut can affect the final fit.',
+                            style: TextStyle(height: 1.45),
+                          ),
+                        ),
+                        const SizedBox(height: 22),
+                        SizedBox(
+                          height: 52,
+                          child: FilledButton.icon(
+                            onPressed: _isSaving ? null : _saveProfile,
+                            icon: _isSaving
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                        strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.save_outlined),
+                            label: Text(
+                                _isSaving ? 'Saving...' : 'Save fit profile'),
+                          ),
+                        ),
+                        if (_hasSavedProfile) ...[
+                          const SizedBox(height: 10),
+                          TextButton.icon(
+                            onPressed: _isSaving ? null : _deleteProfile,
+                            icon: const Icon(Icons.delete_outline),
+                            label: const Text('Delete fit profile'),
                           ),
                         ],
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    const Text(
-                      'Your measurements',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'These details help the app explain which available size may suit you.',
-                      style: TextStyle(color: colors.onSurfaceVariant),
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _heightController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        LengthLimitingTextInputFormatter(5),
                       ],
-                      decoration: _fieldDecoration(
-                        'Height',
-                        'Measure without shoes.',
-                      ),
-                      validator: (value) =>
-                          _validateMeasurement(value, 'height', 120, 230),
                     ),
-                    const SizedBox(height: 18),
-                    TextFormField(
-                      controller: _chestController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        LengthLimitingTextInputFormatter(5),
-                      ],
-                      decoration: _fieldDecoration(
-                        'Chest',
-                        'Measure around the fullest part.',
-                      ),
-                      validator: (value) =>
-                          _validateMeasurement(value, 'chest', 60, 160),
-                    ),
-                    const SizedBox(height: 18),
-                    TextFormField(
-                      controller: _waistController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                        LengthLimitingTextInputFormatter(5),
-                      ],
-                      decoration: _fieldDecoration(
-                        'Waist',
-                        'Measure where you normally wear trousers.',
-                      ),
-                      validator: (value) =>
-                          _validateMeasurement(value, 'waist', 50, 150),
-                    ),
-                    const SizedBox(height: 18),
-                    DropdownButtonFormField<FitPreference>(
-                      value: _fitPreference,
-                      decoration: const InputDecoration(
-                        labelText: 'Preferred fit',
-                        helperText: 'Choose how you like clothes to feel.',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: FitPreference.values
-                          .map(
-                            (preference) => DropdownMenuItem(
-                              value: preference,
-                              child: Text(preference.label),
-                            ),
-                          )
-                          .toList(),
-                      onChanged: (preference) {
-                        if (preference != null) {
-                          setState(() => _fitPreference = preference);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 22),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colors.outlineVariant),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Text(
-                        'Size recommendations are guidance only. Brand, '
-                        'material and product cut can affect the final fit.',
-                        style: TextStyle(height: 1.45),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    SizedBox(
-                      height: 52,
-                      child: FilledButton.icon(
-                        onPressed: _isSaving ? null : _saveProfile,
-                        icon: _isSaving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            : const Icon(Icons.save_outlined),
-                        label: Text(_isSaving ? 'Saving...' : 'Save fit profile'),
-                      ),
-                    ),
-                    if (_hasSavedProfile) ...[
-                      const SizedBox(height: 10),
-                      TextButton.icon(
-                        onPressed: _isSaving ? null : _deleteProfile,
-                        icon: const Icon(Icons.delete_outline),
-                        label: const Text('Delete fit profile'),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
+                  ),
       ),
     );
   }

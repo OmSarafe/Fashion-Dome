@@ -173,7 +173,7 @@ class _ProductFormPageState extends State<ProductFormPage> {
                 controller: _sizesController,
                 label: 'Sizes separated by commas',
                 hint: 'S, M, L, XL',
-                validator: _required,
+                validator: _validateSizes,
               ),
               _field(
                 controller: _assetPathController,
@@ -317,6 +317,20 @@ class _ProductFormPageState extends State<ProductFormPage> {
   String? _positiveMoney(String? value) {
     final amount = double.tryParse(value ?? '');
     return amount == null || amount <= 0 ? 'Enter a valid price.' : null;
+  }
+
+  String? _validateSizes(String? value) {
+    final sizes = (value ?? '')
+        .split(',')
+        .map((size) => size.trim())
+        .where((size) => size.isNotEmpty)
+        .toSet();
+    if (sizes.isEmpty) return 'Enter at least one size.';
+    if (sizes.length > 20) return 'Enter no more than 20 sizes.';
+    if (sizes.any((size) => size.length > 12)) {
+      return 'Each size must be 12 characters or fewer.';
+    }
+    return null;
   }
 
   String? _nonNegativeNumber(String? value) {

@@ -1,6 +1,6 @@
 # Fashion Dome Privacy Policy
 
-Last updated: 25 August 2026
+Last updated: 29 August 2026
 
 ## Who we are
 
@@ -22,12 +22,19 @@ Depending on the features you use, Fashion Dome processes:
 
 Theme and onboarding preferences are stored locally on your device.
 
+If you choose to create a Fit Profile, height, chest and waist measurements and
+your fit preference are also stored only on the device, separated by signed-in
+user. They are not uploaded to Firebase.
+
 ## How we use information
 
 We use information to create and secure accounts, provide the catalogue, save
 preferences, process and track orders, calculate stock, support test payments,
 deliver notifications, show addresses and map suggestions, publish reviews,
 provide customer support and administer the service.
+
+Fit Profile measurements are used only to provide explainable size guidance
+for products.
 
 Processing is based on providing the service you request, your choices and
 consent where applicable, and legitimate interests in security, fraud
@@ -64,6 +71,9 @@ profile, notification tokens, cart, favourites and reviews from the application
 database. Historical orders are retained only as anonymised transaction and
 inventory records: the customer identifier and delivery address are replaced
 with non-identifying deletion markers. You may also contact us for assistance.
+
+You can delete local measurements at any time from **My Fit Profile**. The local
+Fit Profile for the signed-in user is also removed during account deletion.
 
 External providers may retain limited transaction, security, backup or legal
 records under their own retention obligations.

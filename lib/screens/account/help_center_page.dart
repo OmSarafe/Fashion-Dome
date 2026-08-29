@@ -1,15 +1,12 @@
 import 'package:ecommerence_project/screens/account/customer_service_page.dart';
+import 'package:ecommerence_project/screens/account/faq_page.dart';
+import 'package:ecommerence_project/screens/account/privacy_policy_page.dart';
+import 'package:ecommerence_project/screens/notifications/notifications_page.dart';
 import 'package:ecommerence_project/utils/responsive_layout.dart';
 import 'package:flutter/material.dart';
 
-class HelpcenterPage extends StatefulWidget {
+class HelpcenterPage extends StatelessWidget {
   const HelpcenterPage({super.key});
-
-  @override
-  State<HelpcenterPage> createState() => _HelpcenterPageState();
-}
-
-class _HelpcenterPageState extends State<HelpcenterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,12 +14,6 @@ class _HelpcenterPageState extends State<HelpcenterPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(Icons.arrow_back),
-        ),
         centerTitle: true,
         title: const Text(
           'Help Center',
@@ -35,7 +26,11 @@ class _HelpcenterPageState extends State<HelpcenterPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none),
-            onPressed: () {},
+            tooltip: 'Notifications',
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationPage()),
+            ),
           ),
           SizedBox(
             width: 5,
@@ -47,37 +42,41 @@ class _HelpcenterPageState extends State<HelpcenterPage> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 28),
           children: [
-            Divider(
+            const Divider(
               thickness: 0.3,
               color: Colors.grey,
               indent: 25,
               endIndent: 25,
             ),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             profileMenuItem(
-                icon: Icons.headset_mic_outlined,
-                title: "Customer Service",
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CustomerServicePage()));
-                }),
-            profileMenuItem(icon: Icons.chat, title: "Whatsapp", onTap: () {}),
+              icon: Icons.quiz_outlined,
+              title: 'Frequently Asked Questions',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const Faqpage()),
+              ),
+            ),
             profileMenuItem(
-                icon: Icons.credit_card_outlined,
-                title: "Website",
-                onTap: () {}),
+              icon: Icons.headset_mic_outlined,
+              title: 'Customer Service',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CustomerServicePage(),
+                ),
+              ),
+            ),
             profileMenuItem(
-                icon: Icons.facebook_outlined, title: "Facebook", onTap: () {}),
-            profileMenuItem(
-                icon: Icons.flag_outlined, title: "Twitter", onTap: () {}),
-            profileMenuItem(
-                icon: Icons.account_balance_wallet_outlined,
-                title: "Instagram",
-                onTap: () {}),
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy Policy',
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
+              ),
+            ),
           ],
         ),
       ),
@@ -116,6 +115,8 @@ Widget profileMenuItem({
               ),
             ),
             const Spacer(),
+            const Icon(Icons.chevron_right),
+            const SizedBox(width: 14),
           ],
         ),
       ),

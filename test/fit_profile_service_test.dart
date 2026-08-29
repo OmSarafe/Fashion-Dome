@@ -19,8 +19,8 @@ void main() {
       fitPreference: FitPreference.regular,
     );
 
-    await service.saveProfile(profile);
-    final loaded = await service.loadProfile();
+    await service.saveProfile(userId: 'user-a', profile: profile);
+    final loaded = await service.loadProfile(userId: 'user-a');
 
     expect(loaded?.heightCm, 178);
     expect(loaded?.chestCm, 101.5);
@@ -37,10 +37,10 @@ void main() {
       fitPreference: FitPreference.relaxed,
     );
 
-    await service.saveProfile(profile);
-    await service.deleteProfile();
+    await service.saveProfile(userId: 'user-a', profile: profile);
+    await service.deleteProfile(userId: 'user-a');
 
-    expect(await service.loadProfile(), isNull);
+    expect(await service.loadProfile(userId: 'user-a'), isNull);
   });
 
   test('refuses measurements outside the accepted ranges', () async {
@@ -52,6 +52,37 @@ void main() {
       fitPreference: FitPreference.regular,
     );
 
-    expect(() => service.saveProfile(profile), throwsArgumentError);
+    expect(
+      () => service.saveProfile(userId: 'user-a', profile: profile),
+      throwsArgumentError,
+    );
+  });
+
+  test('keeps fit profiles isolated between signed-in users', () async {
+    final service = FitProfileService();
+    const firstProfile = FitProfile(
+      heightCm: 178,
+      chestCm: 101,
+      waistCm: 84,
+      fitPreference: FitPreference.regular,
+    );
+    const secondProfile = FitProfile(
+      heightCm: 165,
+      chestCm: 88,
+      waistCm: 72,
+      fitPreference: FitPreference.slim,
+    );
+
+    await service.saveProfile(userId: 'user-a', profile: firstProfile);
+    await service.saveProfile(userId: 'user-b', profile: secondProfile);
+
+    expect(
+      (await service.loadProfile(userId: 'user-a'))?.waistCm,
+      firstProfile.waistCm,
+    );
+    expect(
+      (await service.loadProfile(userId: 'user-b'))?.waistCm,
+      secondProfile.waistCm,
+    );
   });
 }
