@@ -20,6 +20,8 @@ and light and dark themes.
 - Live product catalogue with categories, search, sorting and filters
 - Product details, stock information, sizes, ratings and customer reviews
 - Privacy-preserving Fit Profile with explainable clothing-size recommendations
+- Budget-aware Style My Look builder for casual, work, party and formal outfits
+- Complete-look cart addition with per-item size selection and live stock checks
 - Persistent favourites and shopping cart
 - Address autocomplete, manual address entry and Google Maps location selection
 - Cash-on-delivery and Stripe test-card checkout
@@ -31,7 +33,7 @@ and light and dark themes.
 
 - Role-protected administrator navigation
 - Sales, customer, order, product and low-stock dashboard metrics
-- Product and category creation, editing and deletion
+- Product and category creation, editing and deletion, including outfit metadata
 - Firebase Storage product-image upload
 - Inventory levels and stock-movement history
 - Order-status management
@@ -79,7 +81,7 @@ The main Firestore collections are:
 - `users/{userId}` — profile, role, address, preferences and FCM tokens
 - `users/{userId}/favorites/{productId}` — saved products
 - `users/{userId}/cart/{cartItemId}` — persistent cart entries
-- `products/{productId}` — catalogue, pricing, images, sizes and inventory
+- `products/{productId}` — catalogue, pricing, images, sizes, inventory and outfit metadata
 - `products/{productId}/reviews/{userId}` — verified customer reviews
 - `products/{productId}/stockMovements/{movementId}` — inventory audit trail
 - `categories/{categoryId}` — administrator-managed catalogue categories
@@ -167,8 +169,8 @@ flutter test
 
 The automated suite covers authentication validators, cart calculations, role
 handling, customer/admin navigation, order lifecycle rules, responsive-layout
-breakpoints, trusted order-input helpers, Fit Profile persistence and explainable
-size-recommendation rules. Firebase integration, payment, notification and
+breakpoints, trusted order-input helpers, Fit Profile persistence, explainable
+size-recommendation rules and budget-constrained outfit generation. Firebase integration, payment, notification and
 release flows must also be verified against the configured test project.
 
 ## Security and privacy

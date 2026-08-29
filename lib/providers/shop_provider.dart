@@ -162,6 +162,9 @@ class ShopProvider extends ChangeNotifier {
       assetImagePath: 'assets/products/slim-fit-formal-shirt.png',
       availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
       stock: 20,
+      outfitCategory: OutfitCategory.top,
+      occasionTags: [OutfitOccasion.work, OutfitOccasion.formal],
+      colour: 'White',
     ),
     Product(
       id: 'corduroy-shirt',
@@ -308,6 +311,48 @@ class ShopProvider extends ChangeNotifier {
       assetImagePath: 'assets/products/hooded-rain-jacket.png',
       availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
       stock: 15,
+    ),
+    Product(
+      id: 'navy-tailored-blazer',
+      name: 'Navy Tailored Blazer',
+      description:
+          'A refined single-breasted blazer for work and formal occasions.',
+      category: 'Blazers',
+      priceInPence: 8999,
+      assetImagePath: 'assets/products/navy-tailored-blazer.png',
+      availableSizes: ['S', 'M', 'L', 'XL', 'XXL'],
+      stock: 12,
+      outfitCategory: OutfitCategory.outerwear,
+      occasionTags: [OutfitOccasion.work, OutfitOccasion.formal],
+      colour: 'Navy',
+    ),
+    Product(
+      id: 'charcoal-formal-trousers',
+      name: 'Charcoal Formal Trousers',
+      description:
+          'Tailored charcoal trousers with a clean crease and regular fit.',
+      category: 'Trousers',
+      priceInPence: 4299,
+      assetImagePath: 'assets/products/charcoal-formal-trousers.png',
+      availableSizes: ['28', '30', '32', '34', '36', '38'],
+      stock: 16,
+      outfitCategory: OutfitCategory.bottom,
+      occasionTags: [OutfitOccasion.work, OutfitOccasion.formal],
+      colour: 'Charcoal',
+    ),
+    Product(
+      id: 'black-oxford-shoes',
+      name: 'Black Oxford Shoes',
+      description:
+          'Classic polished leather Oxford shoes for smart formal styling.',
+      category: 'Shoes',
+      priceInPence: 5999,
+      assetImagePath: 'assets/products/black-oxford-shoes.png',
+      availableSizes: ['7', '8', '9', '10', '11'],
+      stock: 15,
+      outfitCategory: OutfitCategory.footwear,
+      occasionTags: [OutfitOccasion.work, OutfitOccasion.formal],
+      colour: 'Black',
     ),
   ];
 

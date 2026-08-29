@@ -1,5 +1,6 @@
 import 'package:ecommerence_project/screens/notifications/notifications_page.dart';
 import 'package:ecommerence_project/screens/catalog/product_detail_page.dart';
+import 'package:ecommerence_project/screens/catalog/outfit_builder_page.dart';
 import 'package:ecommerence_project/models/product.dart';
 import 'package:ecommerence_project/providers/shop_provider.dart';
 import 'package:ecommerence_project/screens/catalog/search_page.dart';
@@ -129,6 +130,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                _StyleMyLookBanner(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const OutfitBuilderPage(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 SizedBox(
                   height: 36,
                   child: ListView.separated(
@@ -211,6 +221,70 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => ProductDetailPage(product: product),
+      ),
+    );
+  }
+}
+
+class _StyleMyLookBanner extends StatelessWidget {
+  const _StyleMyLookBanner({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.primaryContainer,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: colors.surface.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.auto_awesome_rounded, color: colors.primary),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Style My Look',
+                      style: TextStyle(
+                        color: colors.onPrimaryContainer,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Build a complete outfit for your occasion and budget.',
+                      style: TextStyle(
+                        color: colors.onPrimaryContainer,
+                        fontSize: 13,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_rounded,
+                color: colors.onPrimaryContainer,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

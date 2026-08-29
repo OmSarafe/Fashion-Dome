@@ -40,6 +40,11 @@ Last updated: 29 August 2026
 - Defensive product-size validation and safe handling of products with no available sizes
 - Admin-only starter-catalogue initialization after the user's role is confirmed
 - Privacy Policy updated to document local Fit Profile processing and retention
+- Budget-aware Style My Look builder for casual, work, party and formal occasions
+- Constraint-based outfit recommendations using live prices, stock and catalogue metadata
+- Complete-look cart addition with independent size selection for every item
+- Formal catalogue expanded with a shirt, tailored trousers, blazer and Oxford shoes
+- Admin product form extended with outfit component, occasion and colour metadata
 
 ## Verified manually
 
@@ -64,7 +69,7 @@ Last updated: 29 August 2026
 - T-shirt recommendation verified as size M for a 100 cm chest and regular fit
 - Recommended size automatically selected and retained when added to the cart
 - Jeans recommendation verified as size 32 for an 82 cm waist
-- Full Flutter automated test suite passed: 44 tests
+- Full Flutter automated test suite passed: 48 tests
 - Cloud Functions trusted-order logic suite passed: 5 tests
 - Flutter static analysis passed with no errors after the final application audit
 

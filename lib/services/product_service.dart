@@ -83,7 +83,7 @@ class ProductService {
     final userSnapshot = await userReference.get();
     final userData = userSnapshot.data();
     final currentVersion = (userData?['catalogVersion'] as num?)?.toInt() ?? 0;
-    if (userData?['role'] != 'admin' || currentVersion >= 3) {
+    if (userData?['role'] != 'admin' || currentVersion >= 4) {
       return false;
     }
 
@@ -100,7 +100,9 @@ class ProductService {
           productReference,
           {
             'assetImagePath': product.assetImagePath,
-            'imageUrl': null,
+            'outfitCategory': product.outfitCategory,
+            'occasionTags': product.occasionTags,
+            'colour': product.colour,
             'updatedAt': FieldValue.serverTimestamp(),
           },
           SetOptions(merge: true),
@@ -115,7 +117,7 @@ class ProductService {
     }
     batch.update(userReference, {
       'starterCatalogSeededAt': FieldValue.serverTimestamp(),
-      'catalogVersion': 3,
+      'catalogVersion': 4,
     });
     await batch.commit();
     return true;

@@ -24,6 +24,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late final TextEditingController _categoryController;
+  late final TextEditingController _outfitCategoryController;
+  late final TextEditingController _occasionController;
+  late final TextEditingController _colourController;
   late final TextEditingController _priceController;
   late final TextEditingController _compareAtPriceController;
   late final TextEditingController _stockController;
@@ -46,6 +49,13 @@ class _ProductFormPageState extends State<ProductFormPage> {
         TextEditingController(text: product?.description ?? '');
     _categoryController =
         TextEditingController(text: product?.category ?? 'T-shirts');
+    _outfitCategoryController = TextEditingController(
+      text: product?.resolvedOutfitCategory ?? OutfitCategory.top,
+    );
+    _occasionController = TextEditingController(
+      text: product?.resolvedOccasionTags.join(', ') ?? OutfitOccasion.casual,
+    );
+    _colourController = TextEditingController(text: product?.colour ?? 'Neutral');
     _priceController = TextEditingController(
       text: product == null
           ? ''
@@ -130,6 +140,45 @@ class _ProductFormPageState extends State<ProductFormPage> {
                       ? 'Choose a category.'
                       : null,
                 ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: DropdownButtonFormField<String>(
+                  value: OutfitCategory.values.contains(
+                    _outfitCategoryController.text,
+                  )
+                      ? _outfitCategoryController.text
+                      : OutfitCategory.other,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Outfit component',
+                    helperText: 'Used by Style My Look',
+                  ),
+                  items: OutfitCategory.values
+                      .map(
+                        (category) => DropdownMenuItem(
+                          value: category,
+                          child: Text(_outfitCategoryLabel(category)),
+                        ),
+                      )
+                      .toList(growable: false),
+                  onChanged: _isSaving
+                      ? null
+                      : (value) =>
+                          _outfitCategoryController.text = value ?? '',
+                ),
+              ),
+              _field(
+                controller: _occasionController,
+                label: 'Occasions separated by commas',
+                hint: 'Casual, Work, Party, Formal',
+                validator: _validateOccasions,
+              ),
+              _field(
+                controller: _colourController,
+                label: 'Primary colour',
+                hint: 'Navy',
+                validator: _required,
               ),
               _field(
                 controller: _priceController,
@@ -333,6 +382,50 @@ class _ProductFormPageState extends State<ProductFormPage> {
     return null;
   }
 
+  String? _validateOccasions(String? value) {
+    final occasions = _parseOccasions(value ?? '');
+    if (occasions.isEmpty) {
+      return 'Enter at least one of: ${OutfitOccasion.values.join(', ')}.';
+    }
+    final suppliedCount = (value ?? '')
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .length;
+    if (occasions.length != suppliedCount) {
+      return 'Use only: ${OutfitOccasion.values.join(', ')}.';
+    }
+    return null;
+  }
+
+  List<String> _parseOccasions(String value) {
+    final normalized = value
+        .split(',')
+        .map((item) => item.trim().toLowerCase())
+        .where((item) => item.isNotEmpty)
+        .toSet();
+    return OutfitOccasion.values
+        .where((occasion) => normalized.contains(occasion.toLowerCase()))
+        .toList(growable: false);
+  }
+
+  String _outfitCategoryLabel(String category) {
+    switch (category) {
+      case OutfitCategory.top:
+        return 'Top';
+      case OutfitCategory.bottom:
+        return 'Bottom';
+      case OutfitCategory.outerwear:
+        return 'Outerwear';
+      case OutfitCategory.footwear:
+        return 'Footwear';
+      case OutfitCategory.accessory:
+        return 'Accessory';
+      default:
+        return 'Not used in outfits';
+    }
+  }
+
   String? _nonNegativeNumber(String? value) {
     final number = int.tryParse(value ?? '');
     return number == null || number < 0
@@ -379,6 +472,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
         availableSizes: sizes,
         stock: int.parse(_stockController.text.trim()),
         lowStockThreshold: int.parse(_lowStockThresholdController.text.trim()),
+        outfitCategory: _outfitCategoryController.text,
+        occasionTags: _parseOccasions(_occasionController.text),
+        colour: _colourController.text.trim(),
       );
       await shop.saveProduct(product);
       if (!mounted) return;
@@ -403,6 +499,9 @@ class _ProductFormPageState extends State<ProductFormPage> {
     _nameController.dispose();
     _descriptionController.dispose();
     _categoryController.dispose();
+    _outfitCategoryController.dispose();
+    _occasionController.dispose();
+    _colourController.dispose();
     _priceController.dispose();
     _compareAtPriceController.dispose();
     _stockController.dispose();
